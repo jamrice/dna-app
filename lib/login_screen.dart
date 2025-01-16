@@ -131,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
             )),
         Padding(
           padding: EdgeInsets.only(top: 60, bottom: 50),
-          child: Text("--------- 간편 로그인 ----------"),
+          child: Text("----------- 간편 로그인 ------------"),
         ),
         Center(
             child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
