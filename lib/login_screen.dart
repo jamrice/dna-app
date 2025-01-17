@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'dart:developer';
+
+// import 'dart:developer';
 import 'main.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'sign_up_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -26,12 +27,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _PwController = TextEditingController();
   String _response = '';
 
-  bool _canNavigate = false;
+  // bool _canNavigate = false;
 
   //로그인 데이터 전송
   Future<void> sendLoginData(String username, String password) async {
     print("${username}, ${password}");
-    final url = Uri.parse('http://127.0.0.1:8001/login'); // FastAPI 서버 주소
+    final url = Uri.parse('http://10.0.2.2:8001/login'); // FastAPI 서버 주소
     try {
       final response = await http.post(
         url,
@@ -41,10 +42,9 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         setState(() {
           final data = jsonDecode(response.body);
-          _response =
-          'Username: ${data['id']}, Password: ${data['password']}';
+          _response = 'Username: ${data['id']}, Password: ${data['password']}';
           print(_response);
-          navigateToNextPage(context);
+          // navigateToNextPage(context);
         });
       } else {
         setState(() {
@@ -76,9 +76,10 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      appBar: AppBar(),
       body: Column(children: [
         Padding(
-          padding: EdgeInsets.only(top: 150, bottom: 0),
+          padding: EdgeInsets.only(top: 55, bottom: 0),
           child: Icon(
             Icons.image,
             size: 120,
@@ -111,10 +112,38 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             Container(
               width: 350,
+              height: 55,
               child: MyCheckBox(),
-            )
+            ),
           ]),
         ),
+        Container(
+          width: 58,
+          height: 22,
+          // color: Colors.cyanAccent,
+          decoration: BoxDecoration(
+              border: Border(
+                  bottom: BorderSide(
+            color: Colors.black,
+            width: 1.5,
+          ))),
+          child: GestureDetector(
+            onTap: () {
+              print("sign up");
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => signUpPage()));
+            },
+            child: Text(
+              "회원가입",
+              style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.black,
+                  decoration: TextDecoration.combine([TextDecoration.none]),
+                  decorationColor: Colors.black),
+            ),
+          ),
+        ),
+        Padding(padding: EdgeInsets.only(bottom: 25)),
         ElevatedButton(
             onPressed: () {
               final id = _IdController.text;
@@ -135,43 +164,43 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         Center(
             child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Padding(
-                padding: EdgeInsets.only(right: 20),
-                child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(width: 1, color: Colors.grey)),
-                    child: Center(
-                      child: Icon(Icons.ac_unit, size: 40),
-                    )),
-              ),
-              Padding(
-                padding: EdgeInsets.only(right: 20),
-                child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(width: 1, color: Colors.grey)),
-                    child: Center(
-                      child: Icon(Icons.ac_unit, size: 40),
-                    )),
-              ),
-              Padding(
-                padding: EdgeInsets.only(right: 20),
-                child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(width: 1, color: Colors.grey)),
-                    child: Center(
-                      child: Icon(Icons.ac_unit, size: 40),
-                    )),
-              ),
-            ])),
+          Padding(
+            padding: EdgeInsets.only(right: 20),
+            child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(width: 1, color: Colors.grey)),
+                child: Center(
+                  child: Icon(Icons.ac_unit, size: 40),
+                )),
+          ),
+          Padding(
+            padding: EdgeInsets.only(right: 20),
+            child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(width: 1, color: Colors.grey)),
+                child: Center(
+                  child: Icon(Icons.ac_unit, size: 40),
+                )),
+          ),
+          Padding(
+            padding: EdgeInsets.only(right: 20),
+            child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(width: 1, color: Colors.grey)),
+                child: Center(
+                  child: Icon(Icons.ac_unit, size: 40),
+                )),
+          ),
+        ])),
       ]),
     );
   }
@@ -210,17 +239,33 @@ class _MyCheckBoxState extends State<MyCheckBox> {
                   )),
               Spacer(),
               Padding(
-                padding: EdgeInsets.zero,
-                child: Text(
-                  "ID/PW 찾기",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.black54,
-                    decorationStyle: TextDecorationStyle.solid,
-                    decorationColor: Colors.black54,
-                  ),
-                ),
-              )
+                  padding: EdgeInsets.zero,
+                  child: Container(
+                    // margin: EdgeInsets.symmetric(horizontal: 16,vertical: 5),
+                    width: 82,
+                    height: 22,
+                    // color: Colors.cyanAccent,
+                    decoration: BoxDecoration(
+                        border: Border(
+                            bottom: BorderSide(
+                      color: Colors.black54,
+                      width: 1,
+                    ))),
+                    child: GestureDetector(
+                      onTap: () {
+                        print("find id/pw");
+                      },
+                      child: Text(
+                        "ID/PW 찾기",
+                        style: TextStyle(
+                            fontSize: 15,
+                            color: Colors.grey,
+                            decoration:
+                                TextDecoration.combine([TextDecoration.none]),
+                            decorationColor: Colors.black54),
+                      ),
+                    ),
+                  )),
             ],
           )),
     );
@@ -234,9 +279,9 @@ class loginBox extends StatefulWidget {
 
   const loginBox(
       {super.key,
-        required this.hintText,
-        this.hintStyle,
-        required this.controller});
+      required this.hintText,
+      this.hintStyle,
+      required this.controller});
 
   @override
   _loginBoxState createState() => _loginBoxState();
@@ -253,24 +298,24 @@ class _loginBoxState extends State<loginBox> {
   Widget build(BuildContext context) {
     return MaterialApp(
         home: Container(
-          width: 350,
-          height: 50,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-              color: Colors.transparent,
-              border: Border.all(color: Colors.grey, width: 2),
-              borderRadius: BorderRadius.circular(5)),
-          child: Padding(
-            padding: EdgeInsets.only(left: 15),
-            child: TextField(
-              controller: widget.controller,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: widget.hintText,
-                hintStyle: widget.hintStyle,
-              ),
-            ),
+      width: 350,
+      height: 50,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+          color: Colors.transparent,
+          border: Border.all(color: Colors.grey, width: 2),
+          borderRadius: BorderRadius.circular(5)),
+      child: Padding(
+        padding: EdgeInsets.only(left: 15),
+        child: TextField(
+          controller: widget.controller,
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            hintText: widget.hintText,
+            hintStyle: widget.hintStyle,
           ),
-        ));
+        ),
+      ),
+    ));
   }
 }
