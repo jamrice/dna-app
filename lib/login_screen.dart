@@ -1,321 +1,109 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_naver_login/flutter_naver_login.dart';
 
 // import 'dart:developer';
-import 'main.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'sign_up_screen.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+class LoginPage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(home: LoginScreen());
-  }
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class _LoginPageState extends State<LoginPage> {
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  @override
-  _LoginScreenState createState() => _LoginScreenState();
-}
+  final String clientId = 'qLfMqHGvchFgbsmr8Uz7';
+  final String clientSecret = '69NS7jhduj';
+  final String redirectUri = 'http://localhost:8080';
 
-class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _IdController = TextEditingController();
-  final TextEditingController _PwController = TextEditingController();
-  String _response = '';
+  void signInWithNaver() async {
+    final NaverLoginResult result = await FlutterNaverLogin.logIn();
+    print("naver");
 
-  // bool _canNavigate = false;
-
-  //로그인 데이터 전송
-  Future<void> sendLoginData(String username, String password) async {
-    print("${username}, ${password}");
-    final url = Uri.parse('http://10.0.2.2:8001/login'); // FastAPI 서버 주소
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'id': username, 'password': password}),
-      );
-      if (response.statusCode == 200) {
-        setState(() {
-          final data = jsonDecode(response.body);
-          _response = 'Username: ${data['id']}, Password: ${data['password']}';
-          print(_response);
-          // navigateToNextPage(context);
-        });
-      } else {
-        setState(() {
-          _response = 'Error: ${response.statusCode}';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _response = 'Failed to connect to server: $e';
-      });
+    if (result.status == NaverLoginStatus.loggedIn) {
+      print('accessToken = ${result.accessToken}');
+      print('id = ${result.account.id}');
+      print('email = ${result.account.email}');
+      print('name = ${result.account.name}');
     }
   }
 
-  @override
-  void dispose() {
-    _IdController.dispose();
-    _PwController.dispose();
-    super.dispose();
+  Future<void> _handleSignIn() async {
+    try {
+      final GoogleSignInAccount? account = await _googleSignIn.signIn();
+      if (account != null) {
+        print('Signed in as: ${account.displayName}');
+        print('Email: ${account.email}');
+        print('Profile Picture: ${account.photoUrl}');
+      }
+    } catch (error) {
+      print('Sign-in failed: $error');
+    }
   }
 
-  void navigateToNextPage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => mainScreen()),
-    );
+  Future<void> _handleSignOut() async {
+    await _googleSignIn.signOut();
+    print('User signed out');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(),
-      body: Column(children: [
-        Padding(
-          padding: EdgeInsets.only(top: 55, bottom: 0),
-          child: Icon(
-            Icons.image,
-            size: 120,
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(bottom: 40),
-          child: Text(
-            "데일리국회",
-            style: TextStyle(
-                fontSize: 30,
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -2,
-                decoration: TextDecoration.none),
-          ),
-        ),
-        Center(
-          child: Column(children: [
-            loginBox(
-              hintText: "아이디를 입력하세요",
-              hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
-              controller: _IdController,
-            ),
-            Padding(padding: EdgeInsets.only(bottom: 15)),
-            loginBox(
-              hintText: "비밀번호를 입력하세요!!",
-              hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
-              controller: _PwController,
-            ),
-            Container(
-              width: 350,
-              height: 55,
-              child: MyCheckBox(),
-            ),
-          ]),
-        ),
-        Container(
-          width: 58,
-          height: 22,
-          // color: Colors.cyanAccent,
-          decoration: BoxDecoration(
-              border: Border(
-                  bottom: BorderSide(
-            color: Colors.black,
-            width: 1.5,
-          ))),
-          child: GestureDetector(
-            onTap: () {
-              print("sign up");
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => signUpPage()));
-            },
-            child: Text(
-              "회원가입",
-              style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.black,
-                  decoration: TextDecoration.combine([TextDecoration.none]),
-                  decorationColor: Colors.black),
-            ),
-          ),
-        ),
-        Padding(padding: EdgeInsets.only(bottom: 25)),
-        ElevatedButton(
-            onPressed: () {
-              final id = _IdController.text;
-              final pw = _PwController.text;
-              sendLoginData(id, pw);
-            },
-            style: ElevatedButton.styleFrom(
-              fixedSize: Size(350, 45),
-              backgroundColor: Colors.black,
-            ),
-            child: Text(
-              "로그인",
-              style: TextStyle(fontSize: 15, color: Colors.white),
-            )),
-        Padding(
-          padding: EdgeInsets.only(top: 60, bottom: 50),
-          child: Text("----------- 간편 로그인 ------------"),
-        ),
-        Center(
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Padding(
-            padding: EdgeInsets.only(right: 20),
-            child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(width: 1, color: Colors.grey)),
-                child: Center(
-                  child: Icon(Icons.ac_unit, size: 40),
-                )),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 20),
-            child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(width: 1, color: Colors.grey)),
-                child: Center(
-                  child: Icon(Icons.ac_unit, size: 40),
-                )),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 20),
-            child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(width: 1, color: Colors.grey)),
-                child: Center(
-                  child: Icon(Icons.ac_unit, size: 40),
-                )),
-          ),
-        ])),
-      ]),
-    );
-  }
-}
-
-class MyCheckBox extends StatefulWidget {
-  const MyCheckBox({super.key});
-
-  _MyCheckBoxState createState() => _MyCheckBoxState();
-}
-
-class _MyCheckBoxState extends State<MyCheckBox> {
-  bool isChecked = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Padding(
-          padding: EdgeInsets.only(bottom: 25, top: 5),
-          child: Row(
-            children: [
-              Checkbox(
-                value: isChecked,
-                onChanged: (bool? value) {
-                  setState(() {
-                    isChecked = value ?? false;
-                  });
-                },
-                visualDensity: VisualDensity.compact,
-              ),
-              Text("자동 로그인",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.black54,
-                    decoration: TextDecoration.none,
-                  )),
-              Spacer(),
-              Padding(
-                  padding: EdgeInsets.zero,
-                  child: Container(
-                    // margin: EdgeInsets.symmetric(horizontal: 16,vertical: 5),
-                    width: 82,
-                    height: 22,
-                    // color: Colors.cyanAccent,
-                    decoration: BoxDecoration(
-                        border: Border(
-                            bottom: BorderSide(
-                      color: Colors.black54,
-                      width: 1,
-                    ))),
-                    child: GestureDetector(
-                      onTap: () {
-                        print("find id/pw");
-                      },
-                      child: Text(
-                        "ID/PW 찾기",
-                        style: TextStyle(
-                            fontSize: 15,
-                            color: Colors.grey,
-                            decoration:
-                                TextDecoration.combine([TextDecoration.none]),
-                            decorationColor: Colors.black54),
+      appBar: AppBar(
+          title: Text("로그인")
+      ),
+      body: Center(
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(
+            width: 280,
+            height: 40,
+            child: ElevatedButton(
+                onPressed: _handleSignIn,
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      side: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      )),
+                  elevation: 0,
+                  backgroundColor: Colors.white,
+                  overlayColor: Colors.black26,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 25,
+                      height: 25,
+                      child: Image.asset(
+                        'assets/icons/google_logo.png',
+                        width: 10,
+                        height: 10,
                       ),
                     ),
-                  )),
-            ],
-          )),
-    );
-  }
-}
-
-class loginBox extends StatefulWidget {
-  final String hintText;
-  final TextStyle? hintStyle;
-  final TextEditingController controller;
-
-  const loginBox(
-      {super.key,
-      required this.hintText,
-      this.hintStyle,
-      required this.controller});
-
-  @override
-  _loginBoxState createState() => _loginBoxState();
-}
-
-class _loginBoxState extends State<loginBox> {
-  @override
-  void dispose() {
-    widget.controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Container(
-      width: 350,
-      height: 50,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-          color: Colors.transparent,
-          border: Border.all(color: Colors.grey, width: 2),
-          borderRadius: BorderRadius.circular(5)),
-      child: Padding(
-        padding: EdgeInsets.only(left: 15),
-        child: TextField(
-          controller: widget.controller,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: widget.hintText,
-            hintStyle: widget.hintStyle,
-          ),
+                    Expanded(
+                        child: Center(
+                      child: Text(
+                        'Google 로그인',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.black),
+                      ),
+                    ))
+                  ],
+                ))),
+        ElevatedButton(
+          onPressed: _handleSignOut,
+          child: Text('Sign Out'),
         ),
-      ),
-    ));
+        Padding(padding: EdgeInsets.only(top: 5)),
+        ElevatedButton(
+          onPressed: signInWithNaver,
+          child: Text('네이버 로그인'),
+        ),
+      ])),
+    );
   }
 }
