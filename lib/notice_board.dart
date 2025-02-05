@@ -1,38 +1,85 @@
 import 'package:flutter/material.dart';
 import 'string.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class noticeBoard extends StatelessWidget {
   const noticeBoard({super.key});
 
-
   @override
   Widget build(BuildContext context) {
-    final List<String> items = ['Apple', 'Banana', 'Cherry', 'Date', 'Grape'];
     return Scaffold(
-        appBar: AppBar(title: Text("요즘 국회")),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-                padding: EdgeInsetsDirectional.all(20),
-              child: Text("국회에 올라온 것을 확인해 보세요",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-            ),
-            Expanded(
-                child: ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                      title: Text(items[index]));
-                }
-            )),
-          ],
-        ));
+      body: HomePage()
+    );
   }
 }
 
-final board1 = boardInfo(
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final PageController _pageController = PageController();
+  final int _numPages = 5;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('요즘 국회'),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: _numPages,
+              itemBuilder: (context, pageIndex) {
+                return ListView.builder(
+                  itemCount: 10, // 각 페이지의 아이템 수
+                  itemBuilder: (context, itemIndex) {
+                    return ListTile(
+                      title: Text('Page ${pageIndex + 1}, Item ${itemIndex + 1}'),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(_numPages, (index) {
+              return GestureDetector(
+                onTap: () {
+                  _pageController.animateToPage(
+                    index,
+                    duration: Duration(milliseconds: 500),
+                    curve: Curves.easeIn,
+                  );
+                },
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 4),
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${index + 1}',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              );
+            }),
+          ),
+          SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+}
+
+    final board1 = boardInfo(
     title: "산업집적활성화 및 공장설립에 관한 법률 일부개정법률안(이언주의원 등 11인)",
     billNum: 2207862,
     body: """제안이유
@@ -49,6 +96,6 @@ final board1 = boardInfo(
 라. 시장ㆍ군수ㆍ구청장 또는 관리기관은 지식산업센터 입주업체에 대한 입주적합업종 해당 여부를 주기적으로 확인ㆍ점검하도록 함(안 제28조의6제5항 신설).""",
     summary: "",
     url:
-        "https://likms.assembly.go.kr/bill/billDetail.do?billId=PRC_X2V4W1U1V2D9D1C3A5B3Z5A3I3I4G8",
+    "https://likms.assembly.go.kr/bill/billDetail.do?billId=PRC_X2V4W1U1V2D9D1C3A5B3Z5A3I3I4G8",
     pdfUrl: "",
     date: DateTime(2025, 1, 31));
