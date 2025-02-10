@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       Text("|"),
                       Expanded(
-                        flex: 4,
+                        flex: 8,
                         child: Text(
                           "제목",
                           textAlign: TextAlign.center,
@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       Text("|"),
                       Expanded(
-                        flex: 1,
+                        flex: 2,
                         child: Text(
                           "조회수",
                           textAlign: TextAlign.center,
@@ -74,6 +74,7 @@ class _HomePageState extends State<HomePage> {
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
+                      Text("1234"),
                     ],
                   ),
                 )),
