@@ -21,7 +21,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final PageController _pageController = PageController();
     return Scaffold(
       appBar: AppBar(
         title: Container(
@@ -256,56 +255,7 @@ class MyApp extends StatelessWidget {
               "카테고리 별로 모아봤어요",
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
-            Padding(
-                padding: EdgeInsets.only(
-              bottom: 10,
-            )),
-            Column(
-              children: [
-                Container(
-                  width: 500,
-                  height: 180,
-                  child: PageView(
-                    controller: _pageController,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 20, right: 20),
-                        child: GridView.builder(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 30,
-                            mainAxisSpacing: 20,
-                          ),
-                          itemCount: 6,
-                          itemBuilder: (context, index) {
-                            return Container(
-                                color: Colors.black12,
-                                child: CategoryGridItem(index: index)
-                            );
-                          },
-                        ),
-                      ),
-                      Container(
-                          color: Colors.black12,
-                          child: Center(child: Text('Page 2'))),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                SmoothPageIndicator(
-                  controller: _pageController,
-                  count: 2,
-                  effect: WormEffect(
-                      dotColor: Colors.black26,
-                      dotHeight: 5,
-                      dotWidth: 5,
-                      activeDotColor: Colors.black),
-                ),
-              ],
-            )
+            MyPageView(),
           ]),
     );
   }

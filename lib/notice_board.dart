@@ -7,9 +7,7 @@ class noticeBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: HomePage()
-    );
+    return Scaffold(body: HomePage());
   }
 }
 
@@ -22,6 +20,8 @@ class _HomePageState extends State<HomePage> {
   final PageController _pageController = PageController();
   final int _numPages = 5;
 
+  final List<String> category = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,20 +30,74 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: [
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _numPages,
-              itemBuilder: (context, pageIndex) {
-                return ListView.builder(
-                  itemCount: 10, // 각 페이지의 아이템 수
-                  itemBuilder: (context, itemIndex) {
-                    return ListTile(
-                      title: Text('Page ${pageIndex + 1}, Item ${itemIndex + 1}'),
-                    );
-                  },
-                );
-              },
+          Padding(
+            padding: EdgeInsets.only(left: 10, right: 10),
+            child: Container(
+                height: 35,
+                color: Colors.black26,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 5, right: 5),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 60,
+                        child: Text(
+                          "의안번호",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Text("|"),
+                      Expanded(
+                        flex: 8,
+                        child: Text(
+                          "제목",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Text("|"),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          "조회수",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Text("|"),
+                      SizedBox(
+                        width: 50,
+                        child: Text(
+                          "추천",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 10, right: 10),
+            child: Container(
+              height: 600,
+              color: Colors.deepPurpleAccent,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _numPages,
+                itemBuilder: (context, pageIndex) {
+                  return ListView.builder(
+                    itemCount: 10, // 각 페이지의 아이템 수
+                    itemBuilder: (context, itemIndex) {
+                      return ListTile(
+                        title:
+                        Text('Page ${pageIndex + 1}, Item ${itemIndex + 1}'),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
           Row(
@@ -79,7 +133,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-    final board1 = boardInfo(
+final board1 = boardInfo(
     title: "산업집적활성화 및 공장설립에 관한 법률 일부개정법률안(이언주의원 등 11인)",
     billNum: 2207862,
     body: """제안이유
@@ -96,6 +150,6 @@ class _HomePageState extends State<HomePage> {
 라. 시장ㆍ군수ㆍ구청장 또는 관리기관은 지식산업센터 입주업체에 대한 입주적합업종 해당 여부를 주기적으로 확인ㆍ점검하도록 함(안 제28조의6제5항 신설).""",
     summary: "",
     url:
-    "https://likms.assembly.go.kr/bill/billDetail.do?billId=PRC_X2V4W1U1V2D9D1C3A5B3Z5A3I3I4G8",
+        "https://likms.assembly.go.kr/bill/billDetail.do?billId=PRC_X2V4W1U1V2D9D1C3A5B3Z5A3I3I4G8",
     pdfUrl: "",
     date: DateTime(2025, 1, 31));
