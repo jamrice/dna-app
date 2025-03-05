@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'string.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class noticeBoard extends StatelessWidget {
   const noticeBoard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: HomePage()
-    );
+    return Scaffold(body: HomePage());
   }
 }
 
@@ -20,82 +18,231 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final PageController _pageController = PageController();
-  final int _numPages = 5;
+  static const int itemsPerPage = 10; // 한 페이지당 아이템 개수
+  int currentPage = 0;
+  int totalCount = 0;
+  int itemCount = 0;
+
+  List<dynamic> bills = [];
+  bool isLoading = true;
+  String errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDataFromServer(currentPage);
+  }
+
+  Future<void> fetchDataFromServer(int page) async {
+    final url = Uri.parse("http://20.39.187.232:8000/bills/all/?page=${page}");
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
+
+        if (decodedResponse is Map<String, dynamic> &&
+            decodedResponse.containsKey(("bills"))) {
+          setState(() {
+            bills = decodedResponse["bills"];
+            totalCount = decodedResponse["total_count"];
+            itemCount = decodedResponse["bills"].length;
+            isLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          errorMessage = '서버 오류: ${response.statusCode}';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = '요청 실패: $e';
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    int _numPages = (totalCount / itemsPerPage).ceil();
     return Scaffold(
-      appBar: AppBar(
-        title: Text('요즘 국회'),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _numPages,
-              itemBuilder: (context, pageIndex) {
-                return ListView.builder(
-                  itemCount: 10, // 각 페이지의 아이템 수
-                  itemBuilder: (context, itemIndex) {
-                    return ListTile(
-                      title: Text('Page ${pageIndex + 1}, Item ${itemIndex + 1}'),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(_numPages, (index) {
-              return GestureDetector(
-                onTap: () {
-                  _pageController.animateToPage(
-                    index,
-                    duration: Duration(milliseconds: 500),
-                    curve: Curves.easeIn,
-                  );
-                },
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 4),
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '${index + 1}',
-                    style: TextStyle(color: Colors.white),
-                  ),
+      appBar: AppBar(title: Text('요즘 국회')),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator()) // 로딩 표시
+          : errorMessage.isNotEmpty
+              ? Center(
+                  child:
+                      Text(errorMessage, style: TextStyle(color: Colors.red)))
+              : Column(
+                  children: [
+                    Expanded(
+                      child: PageView.builder(
+                        controller: _pageController,
+                        itemCount: _numPages,
+                        onPageChanged: (pageIndex) {
+                          setState(() {
+                            currentPage = pageIndex;
+                            fetchDataFromServer(currentPage);
+                          });
+                        },
+                        itemBuilder: (context, pageIndex) {
+                          return bills.isEmpty
+                              ? Center(child: Text("표시할 데이터가 없습니다."))
+                              : ListView.builder(
+                                  itemCount: itemCount,
+                                  itemBuilder: (context, itemIndex) {
+                                    return noticeBoardItem(
+                                        bills[itemIndex]); // 데이터 전달
+                                  },
+                                );
+                        },
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children:
+                          List.generate(_numPages > 5 ? 5 : _numPages, (index) {
+                        int visibleIndex;
+
+                        if (_numPages <= 5) {
+                          // 전체 페이지가 5 이하일 경우 그냥 출력
+                          visibleIndex = index;
+                        } else {
+                          // 페이지가 5개 이상일 경우 중앙 정렬을 위해 계산
+                          if (currentPage <= 2) {
+                            // 초반 페이지(0,1,2)에서는 처음 5개를 고정
+                            visibleIndex = index;
+                          } else if (currentPage >= _numPages - 3) {
+                            // 마지막 페이지 근처에서는 마지막 5개를 고정
+                            visibleIndex = _numPages - 5 + index;
+                          } else {
+                            // 그 외의 경우, currentPage를 중앙에 배치
+                            visibleIndex = currentPage - 2 + index;
+                          }
+
+                          // 마지막 페이지가 전체 페이지 수보다 넘지 않도록 처리
+                          visibleIndex = visibleIndex.clamp(0, _numPages - 1);
+                        }
+
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              currentPage = index;
+                            });
+                            _pageController.jumpToPage(visibleIndex);
+                            fetchDataFromServer(currentPage);
+                          },
+                          child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: 4),
+                            width: 35,
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: (visibleIndex == currentPage)
+                                  ? Colors.blue
+                                  : Colors.grey,
+                              borderRadius: BorderRadius.circular(0),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${visibleIndex + 1}',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            )
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
                 ),
-              );
-            }),
-          ),
-          SizedBox(height: 16),
-        ],
-      ),
     );
   }
 }
 
-    final board1 = boardInfo(
-    title: "산업집적활성화 및 공장설립에 관한 법률 일부개정법률안(이언주의원 등 11인)",
-    billNum: 2207862,
-    body: """제안이유
+class noticeBoardItem extends StatelessWidget {
+  final dynamic itemData;
 
-현행법에 따르면 지식산업센터에 대한 규제가 부재하여 분양 후 전매를 통한 투기행위가 발생하고 있어 실제 입주가 필요한 기업들의 입주비용이 증가하는 등 문제가 지속적으로 발생하고 있음. 더불어 분양승인 전에 홍보관을 설치하고 총사업비에 과도한 분양홍보관 비용을 포함시켜 분양가가 상승한다는 지적도 제기됨.
-이에 지식산업센터를 분양받은 자가 전매를 하거나 전매를 알선할 수 없도록 하고, 지식산업센터를 설립한 자는 모집공고안 승인 전에 분양홍보관을 설치할 수 없도록 하여 지속적인 산업발전을 도모하려는 것임.
+  noticeBoardItem(this.itemData, {Key? key}) : super(key: key);
 
-
-주요내용
-
-가. 지식산업센터를 분양받은 자가 분양받은 자의 지위 또는 건축물을 전매하거나 전매를 알선하여서는 아니 되도록 함(안 제28조의4제5항 신설).
-나. 지식산업센터를 임대받은 자는 이를 다른 사람에게 전대(轉貸)하여서는 아니 되도록 함(안 제28조의4제6항 신설).
-다. 지식산업센터를 설립한 자는 모집공고안 승인을 받지 아니하고 분양홍보관을 설치할 수 없도록 함(안 제28조의4제7항 신설).
-라. 시장ㆍ군수ㆍ구청장 또는 관리기관은 지식산업센터 입주업체에 대한 입주적합업종 해당 여부를 주기적으로 확인ㆍ점검하도록 함(안 제28조의6제5항 신설).""",
-    summary: "",
-    url:
-    "https://likms.assembly.go.kr/bill/billDetail.do?billId=PRC_X2V4W1U1V2D9D1C3A5B3Z5A3I3I4G8",
-    pdfUrl: "",
-    date: DateTime(2025, 1, 31));
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        print(itemData["num"]);
+      },
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 5),
+        child: Container(
+          height: 80,
+          child: Row(
+            children: [
+              Container(
+                width: 70,
+                color: Colors.black12,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("${itemData["num"]}", style: TextStyle(fontSize: 13)),
+                    SizedBox(height: 15),
+                    Text("${itemData['bill_type']}",
+                        style: TextStyle(fontSize: 13)),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        alignment: Alignment.centerLeft,
+                        color: Colors.black26,
+                        child: Text(
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          itemData['title'] ?? "의안 제목 없음",
+                          style: TextStyle(fontSize: 13, color: Colors.black),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        alignment: Alignment.center,
+                        color: Colors.white54,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "제안자: ${itemData['proposer']}",
+                              style: TextStyle(fontSize: 13, color: Colors.black),
+                            ),
+                            Row(
+                              children: [
+                                Icon(Icons.favorite, size: 16),
+                                SizedBox(width: 5),
+                                Text("${itemData['likes']}",
+                                    style: TextStyle(
+                                        fontSize: 13, color: Colors.black)),
+                                SizedBox(width: 5),
+                                Icon(Icons.remove_red_eye, size: 16),
+                                SizedBox(width: 5),
+                                Text("${itemData['views']}",
+                                    style: TextStyle(
+                                        fontSize: 13, color: Colors.black)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

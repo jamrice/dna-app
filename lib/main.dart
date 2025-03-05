@@ -1,11 +1,8 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
-import 'sign_up_screen.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'notice_board.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'simple_notice_board.dart';
 import 'categoryItem.dart';
 
 // sha-1 : C5:80:75:66:C1:14:83:34:F9:EE:24:38:B1:B7:D5:FF:1E:9A:C4:91
@@ -22,6 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final PageController _pageController = PageController();
+    final List<String> items = List.generate(12, (index) => 'Item ${index + 1}'); // 총 12개 아이템
     return Scaffold(
       appBar: AppBar(
         title: Container(
@@ -49,20 +47,20 @@ class MyApp extends StatelessWidget {
             },
           ),
           Padding(
-            padding: EdgeInsets.only(right: 10),
+            padding: EdgeInsets.only(right: 5),
             child: ElevatedButton(
               onPressed: () {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => LoginPage()));
               },
               style: ElevatedButton.styleFrom(
-                fixedSize: Size(90, 20),
+                fixedSize: Size(85, 20),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
                 // padding: EdgeInsets.only(bottom: 10)
               ),
               child: Text("로그인",
-                  style: TextStyle(fontSize: 15, color: Colors.black)),
+                  style: TextStyle(fontSize: 13, color: Colors.black)),
             ),
           ),
         ],
@@ -109,45 +107,71 @@ class MyApp extends StatelessWidget {
             //본문
             // ai 요약 파트
             Text(
-              "~를 위한 요약",
+              "User.name 를 위한 요약",
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
             Padding(
               padding: EdgeInsets.only(top: 10, bottom: 20),
-              child: Container(
-                  width: 400,
-                  decoration: BoxDecoration(
-                      color: Colors.black12,
-                      borderRadius: BorderRadius.circular(5)),
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: 10, left: 10, right: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(top: 10, left: 5),
-                          child: Text(
-                            "1124513513",
-                            style: TextStyle(fontSize: 11),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 10, left: 5),
-                          child: Text(
-                            "1124513513",
-                            style: TextStyle(fontSize: 11),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 10, left: 5),
-                          child: Text(
-                            "1124513513",
-                            style: TextStyle(fontSize: 11),
-                          ),
-                        ),
-                      ],
+              child: SizedBox(
+                height: 140,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    Container(
+                      width: 160,
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey,
+                          blurRadius: 5.0,
+                          spreadRadius: 0.0,
+                          offset: Offset(0,0),
+                        ),],
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text("추천 1"),
                     ),
-                  )),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Container(
+                      width: 160,
+                      decoration: BoxDecoration(
+                        color: Colors.blueAccent,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey,
+                            blurRadius: 5.0,
+                            spreadRadius: 0.0,
+                            offset: Offset(0,0),
+                          ),],
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text("추천 1"),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Container(
+                      width: 160,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey,
+                            blurRadius: 5.0,
+                            spreadRadius: 0.0,
+                            offset: Offset(0,0),
+                          ),],
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text("추천 1"),
+                    ),
+                  ],
+                )
+              ),
+
             ),
             //최근 국회 파트
             Row(
@@ -224,34 +248,17 @@ class MyApp extends StatelessWidget {
             ),
             Padding(
                 padding: EdgeInsets.only(top: 10, bottom: 20),
-                child: Container(
-                    width: 400,
-                    decoration: BoxDecoration(
-                        color: Colors.black12,
-                        borderRadius: BorderRadius.circular(5)),
-                    child: Padding(
-                        padding:
-                            EdgeInsets.only(bottom: 10, left: 10, right: 10),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(left: 5, top: 10),
-                                child: Text(
-                                  "[2207596] 제421회국회(임시회) 회기결정의 건(의장)",
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(left: 5, top: 10),
-                                child: Text(
-                                  """1. 서울서부지방법원 불법적 폭동사태 관련 긴급현안질문 실시의 건(의장 제의)(의안번호 2207752) \n\n2. 서울서부지방법원 불법적 폭동사태 관련 긴급현안질문""",
-                                  style: TextStyle(fontSize: 11),
-                                ),
-                              )
-                            ])))),
+              child: Container(
+                width: double.infinity,
+                height: 245,
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.black12,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: simpleNoticeBoard(),
+              ),
+            ),
             Text(
               "카테고리 별로 모아봤어요",
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
@@ -260,53 +267,9 @@ class MyApp extends StatelessWidget {
                 padding: EdgeInsets.only(
               bottom: 10,
             )),
-            Column(
-              children: [
-                Container(
-                  width: 500,
-                  height: 180,
-                  child: PageView(
-                    controller: _pageController,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 20, right: 20),
-                        child: GridView.builder(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 30,
-                            mainAxisSpacing: 20,
-                          ),
-                          itemCount: 6,
-                          itemBuilder: (context, index) {
-                            return Container(
-                                color: Colors.black12,
-                                child: CategoryGridItem(index: index)
-                            );
-                          },
-                        ),
-                      ),
-                      Container(
-                          color: Colors.black12,
-                          child: Center(child: Text('Page 2'))),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                SmoothPageIndicator(
-                  controller: _pageController,
-                  count: 2,
-                  effect: WormEffect(
-                      dotColor: Colors.black26,
-                      dotHeight: 5,
-                      dotWidth: 5,
-                      activeDotColor: Colors.black),
-                ),
-              ],
-            )
+            Categoryitem(),
           ]),
     );
   }
 }
+
