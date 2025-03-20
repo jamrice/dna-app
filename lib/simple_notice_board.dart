@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'board/complex_notice_board.dart';
 
-class simpleNoticeBoard extends StatelessWidget {
-  const simpleNoticeBoard({super.key});
+class SimpleNoticeBoard extends StatelessWidget {
+  const SimpleNoticeBoard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,6 @@ class _SimpleNoticeBoardItemState extends State<SimpleNoticeBoardItem> {
   void initState() {
     super.initState();
     fetchSimpleDataFromServer();
-    print(data);
   }
 
   Future<void> fetchSimpleDataFromServer() async {
@@ -58,17 +59,16 @@ class _SimpleNoticeBoardItemState extends State<SimpleNoticeBoardItem> {
   @override
   Widget build(BuildContext context) {
     double itemHeight = 35; // 각 아이템의 높이 (설정 가능)
-    int itemCount = data.length > 5 ? 5 : data.length; // 최대 5개까지만 표시
-    double containerHeight =
-        itemHeight * (itemCount == 0 ? 1 : itemCount) + 45; // 위아래 여백 포함
+    int itemCount = 5; // 최대 5개까지만 표시
+    // double containerHeight =
+    //     itemHeight * (itemCount == 0 ? 1 : itemCount) + 0; // 위아래 여백 포함
 
     return Center(
       child: Container(
         width: double.infinity,
         height: 225,
         // 리스트뷰의 높이를 데이터 개수에 맞게 조절
-        color: Colors.black12,
-        padding: EdgeInsets.zero,
+        color: Colors.transparent,
         child: isLoading
             ? Center(child: CircularProgressIndicator()) // 로딩 화면
             : data.isEmpty
@@ -77,7 +77,6 @@ class _SimpleNoticeBoardItemState extends State<SimpleNoticeBoardItem> {
                 : ListView.builder(
                     shrinkWrap: true,
                     // 리스트뷰 크기를 컨텐츠 크기에 맞춤
-                    padding: EdgeInsets.zero,
                     physics: NeverScrollableScrollPhysics(),
                     // 리스트뷰 자체 스크롤 비활성화
                     itemCount: itemCount,
@@ -85,33 +84,44 @@ class _SimpleNoticeBoardItemState extends State<SimpleNoticeBoardItem> {
                     itemBuilder: (context, index) {
                       if (index < data.length) {
                         // 데이터가 있는 경우 표시
-                        return Container(
-                          height: itemHeight,
-                          margin: EdgeInsets.only(top: index == 0 ? 0 : 10),
-                          // 각 컨테이너 사이 간격
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.black26,
-                            borderRadius: BorderRadius.circular(8), // 모서리 둥글게
-                          ),
-                          child: Row(
-                            children: [
-                              Text("${data[index]["num"]}",
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                              Text(" | "),
-                              Expanded(
-                                child: Text(
-                                  "${data[index]["title"]}",
-                                  maxLines: 1,
-                                  softWrap: false,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontSize: 16),
+                        return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          ComplexNoticeBoard(data: data[0])));
+                            },
+                            child: Padding(
+                              padding: index == 0 ? EdgeInsets.only(top: 3, bottom: 10) : EdgeInsets.only(bottom: 10),
+                              child: Container(
+                                height: itemHeight,
+                                // 각 컨테이너 사이 간격
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.black26,
+                                  borderRadius:
+                                      BorderRadius.circular(8), // 모서리 둥글게
+                                ),
+                                child: Row(
+                                  children: [
+                                    Text("${data[index]["num"]}",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    Text(" | "),
+                                    Expanded(
+                                      child: Text(
+                                        "${data[index]["title"]}",
+                                        maxLines: 1,
+                                        softWrap: false,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        );
+                            ));
                       } else {
                         // 데이터가 부족할 경우 빈 컨테이너 추가
                         return Container(

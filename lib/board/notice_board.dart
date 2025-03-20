@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'complex_notice_board.dart';
 
-class noticeBoard extends StatelessWidget {
-  const noticeBoard({super.key});
+class NoticeBoard extends StatelessWidget {
+  const NoticeBoard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: HomePage());
+    return Scaffold(body: NoticeBoardItem());
   }
 }
 
-class HomePage extends StatefulWidget {
+class NoticeBoardItem extends StatefulWidget {
+  const NoticeBoardItem({super.key});
+
   @override
-  _HomePageState createState() => _HomePageState();
+  _NoticeBoardItemState createState() => _NoticeBoardItemState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _NoticeBoardItemState extends State<NoticeBoardItem> {
   final PageController _pageController = PageController();
   static const int itemsPerPage = 10; // 한 페이지당 아이템 개수
   int currentPage = 0;
@@ -168,27 +171,14 @@ class noticeBoardItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        print(itemData["num"]);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => ComplexNoticeBoard(data: itemData)));
       },
       child: Padding(
-        padding: EdgeInsets.only(bottom: 5),
+        padding: EdgeInsets.only(bottom: 5, left: 10, right: 10),
         child: Container(
-          height: 80,
+          height: 70,
           child: Row(
             children: [
-              Container(
-                width: 70,
-                color: Colors.black12,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("${itemData["num"]}", style: TextStyle(fontSize: 13)),
-                    SizedBox(height: 15),
-                    Text("${itemData['bill_type']}",
-                        style: TextStyle(fontSize: 13)),
-                  ],
-                ),
-              ),
               Expanded(
                 child: Column(
                   children: [
@@ -209,7 +199,14 @@ class noticeBoardItem extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         alignment: Alignment.center,
-                        color: Colors.white54,
+                        decoration: BoxDecoration(
+                          color: Colors.white54,
+                          border: Border(
+                            left: BorderSide(color: Colors.black26, width: 1),
+                            right: BorderSide(color: Colors.black26, width: 1),
+                            bottom: BorderSide(color: Colors.black26, width: 1),
+                          )
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
