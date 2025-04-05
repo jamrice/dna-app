@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'complex_notice_board.dart';
+import 'package:dna/color.dart';
 
 class NoticeBoard extends StatelessWidget {
   const NoticeBoard({super.key});
@@ -37,7 +38,7 @@ class _NoticeBoardItemState extends State<NoticeBoardItem> {
   }
 
   Future<void> fetchDataFromServer(int page) async {
-    final url = Uri.parse("http://20.39.187.232:8000/bills/all/?page=${page}");
+    final url = Uri.parse("http://20.39.187.232:8000/bills/all/?page=${page+1}&items_per_page=10");
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -186,11 +187,11 @@ class noticeBoardItem extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         alignment: Alignment.centerLeft,
-                        color: Colors.black26,
+                        color: boardColor,
                         child: Text(
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          itemData['title'] ?? "의안 제목 없음",
+                          itemData['bill_title'] ?? "의안 제목 없음",
                           style: TextStyle(fontSize: 13, color: Colors.black),
                         ),
                       ),
@@ -202,17 +203,24 @@ class noticeBoardItem extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.white54,
                           border: Border(
-                            left: BorderSide(color: Colors.black26, width: 1),
-                            right: BorderSide(color: Colors.black26, width: 1),
-                            bottom: BorderSide(color: Colors.black26, width: 1),
+                            left: BorderSide(color: boardColor!, width: 1),
+                            right: BorderSide(color: boardColor!, width: 1),
+                            bottom: BorderSide(color: boardColor!, width: 1),
                           )
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              "제안자: ${itemData['proposer']}",
-                              style: TextStyle(fontSize: 13, color: Colors.black),
+                            Container(
+                              width: 220,
+                              height: 30,
+                              padding: EdgeInsets.only(top: 5),
+                              child: Text(
+                                "제안자: ${itemData['ppsr_name']}",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 13, color: Colors.black),
+                              ),
                             ),
                             Row(
                               children: [

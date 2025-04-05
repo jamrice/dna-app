@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_login/flutter_naver_login.dart';
-
-// import 'dart:developer';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {

@@ -33,7 +33,7 @@ class Categoryitem extends StatelessWidget {
       children: [
         Container(
           width: 400,
-          height: 220,
+          height: 210,
           child: PageView.builder(
             controller: _pageController,
             itemCount: pages.length,
@@ -50,8 +50,8 @@ class Categoryitem extends StatelessWidget {
                   shrinkWrap: true, // GridView 높이를 자동으로 조정
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
-                    crossAxisSpacing: 15,
-                    mainAxisSpacing: 15,
+                    crossAxisSpacing: 30,
+                    mainAxisSpacing: 0,
                   ),
                   itemCount: pages[pageIndex].length,
                   itemBuilder: (context, itemIndex) {
