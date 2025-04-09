@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../loginScreen/login_screen.dart';
-import '../boardScreen/notice_board.dart';
-import 'simple_notice_board.dart';
-import 'categoryItem.dart';
-import '../secure_storage/secure_storage_notifier.dart';
-import '../color.dart';
-import 'user_summary_board.dart';
+import 'loginScreen/login_screen.dart';
+import 'boardScreen/notice_board.dart';
+import 'mainScreen/simple_notice_board.dart';
+import 'mainScreen/categoryItem.dart';
+import 'secure_storage/secure_storage_notifier.dart';
+import 'color.dart';
+import 'mainScreen/user_summary_board.dart';
 
 // 전역 네비게이션 키 정의
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -23,6 +23,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
+      initialRoute: '/main',
+      routes: {'/main': (context) => HomePage()},
       home: const HomePage(),
     );
   }
@@ -45,6 +47,9 @@ class _HomePageState extends ConsumerState<HomePage> {
   // 토큰 상태 확인 및 로드
   Future<void> _checkToken() async {
     await ref.read(secureStorageProvider.notifier).load('ACCESS_TOKEN');
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -55,12 +60,13 @@ class _HomePageState extends ConsumerState<HomePage> {
         tokenState != null && tokenState.containsKey('ACCESS_TOKEN');
     final TextEditingController _searchController = TextEditingController();
 
-    debugPrint('현재 토큰 상태: $tokenState');
-    debugPrint('토큰 존재 여부: $hasToken');
+    debugPrint('main.dart 현재 토큰 상태: $tokenState');
+    debugPrint('main.dart 토큰 존재 여부: $hasToken');
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[300],
+        automaticallyImplyLeading: false,
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -73,7 +79,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           IconButton(
             icon: const Icon(Icons.notifications),
             onPressed: () {
-              debugPrint('알림 버튼 클릭');
+              debugPrint('refresh');
             },
           ),
           Padding(
@@ -107,50 +113,72 @@ class _HomePageState extends ConsumerState<HomePage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              // child: hasToken ? IconButton(onPressed: () {}, icon: Icon(Icons.account_circle)),
               child: Text(hasToken ? "로그아웃" : "로그인",
                   style: const TextStyle(fontSize: 13, color: Colors.black)),
             ),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        children: [
-          const Text(
-            "성공적인 연금 개혁을 위한\n 뜨거운 논쟁이 벌어지고 있어요",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 20),
-          _buildSearchBar(_searchController),
-          const SizedBox(height: 20),
+      body: FutureBuilder(
+          future: ref.read(secureStorageProvider.notifier).load('ACCESS_TOKEN'),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
 
-          // 로그인 상태에 따라 다른 환영 메시지 표시
-          _buildSectionTitle(
-              hasToken ? "환영합니다! 맞춤 요약을 확인하세요" : "로그인하고 맞춤 정보를 확인하세요"),
+            // 토큰이 로드된 후
+            final tokenState = ref.watch(secureStorageProvider);
+            final hasToken =
+                tokenState != null && tokenState.containsKey('ACCESS_TOKEN');
 
-          _buildSummarySection(),
-          // SummaryBoard(),
-          SizedBox(
-            height: 20,
-          ),
-          _buildSectionTitle("최근 국회 회의록, 쉽게 읽어보세요", showMore: true),
-          _buildRecentMeetings(),
-          SizedBox(
-            height: 20,
-          ),
-          _buildSectionTitle("요즘 국회", showMore: true, onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => NoticeBoard()));
+            debugPrint('현재 토큰 상태: $tokenState');
+            debugPrint('토큰 존재 여부: $hasToken');
+
+            return RefreshIndicator(
+              onRefresh: () async {
+                setState(() {});
+              },
+              child: ListView(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                children: [
+                  const Text(
+                    "성공적인 연금 개혁을 위한\n 뜨거운 논쟁이 벌어지고 있어요",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildSearchBar(_searchController),
+                  const SizedBox(height: 20),
+
+                  // 로그인 상태에 따라 다른 환영 메시지 표시
+                  _buildSectionTitle(
+                      hasToken ? "환영합니다! 맞춤 요약을 확인하세요" : "로그인하고 맞춤 정보를 확인하세요"),
+
+                  _buildSummarySection(),
+                  // SummaryBoard(),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  _buildSectionTitle("최근 국회 회의록, 쉽게 읽어보세요", showMore: true),
+                  _buildRecentMeetings(),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  _buildSectionTitle("요즘 국회", showMore: true, onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => NoticeBoard()));
+                  }),
+                  _buildNoticeBoard(),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  _buildSectionTitle("카테고리 별로 모아봤어요"),
+                  Categoryitem(),
+                ],
+              ),
+            );
           }),
-          _buildNoticeBoard(),
-          SizedBox(
-            height: 20,
-          ),
-          _buildSectionTitle("카테고리 별로 모아봤어요"),
-          Categoryitem(),
-        ],
-      ),
     );
   }
 
@@ -193,10 +221,11 @@ class _HomePageState extends ConsumerState<HomePage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Text(title,
                 style:
-                const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ),
           if (showMore)
             GestureDetector(

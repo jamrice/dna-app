@@ -25,6 +25,7 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
   void initState() {
     super.initState();
     _initializeData();
+    print(widget.data['bill_title']);
     _enterTime = DateTime.now();
     _scrollController.addListener(_updateExpandedHeight);
   }
@@ -34,10 +35,11 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
     try {
       // 토큰 상태를 Riverpod을 통해 직접 확인
       final tokenState = ref.read(secureStorageProvider);
-      final hasToken = tokenState != null && tokenState.containsKey('ACCESS_TOKEN');
+      final hasToken =
+          tokenState != null && tokenState.containsKey('ACCESS_TOKEN');
 
       if (hasToken) {
-        final token = tokenState['ACCESS_TOKEN'];
+        token = tokenState['ACCESS_TOKEN'];
         print('complex: $token');
       } else {
         print("토큰이 없습니다. 로그인이 필요합니다.");
@@ -47,24 +49,31 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
     }
   }
 
-  Future<void> sendTimeDataToServer(String token, int duration) async {
+  Future<void> sendTimeDataToServer(String token) async {
+    final exitTime = DateTime.now();
+    final duration = exitTime.difference(_enterTime);
+
     final url = Uri.parse("http://20.39.187.232:8000/page_visit/save");
+    print("token: $token");
+
     final headers = {
       'accept': 'application/json',
+      'access-token': token,
       'Content-Type': 'application/json',
     };
 
     final body = jsonEncode({
-      'visit_duration': duration.toString(),
-      'access_token': token,
-      'page_id': widget.data['bill_id'],
+      "visit_duration": duration.inSeconds,
+      "page_id": widget.data['bill_id'],
     });
+
     try {
-      final response = await http.post(url,headers: headers, body: body);
+      final response = await http.post(url, headers: headers, body: body);
       if (response.statusCode == 200) {
         print("전송성공");
       } else {
         print("오류 상태 코드: ${response.statusCode}");
+        print("body: ${response.body}");
         print(widget.data['bill_id']);
       }
     } catch (e) {
@@ -82,9 +91,7 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
   void dispose() {
     _scrollController.removeListener(_updateExpandedHeight);
     _scrollController.dispose();
-    final DateTime _endTime = DateTime.now();
-    final duration = _endTime.difference(_enterTime);
-    sendTimeDataToServer(token!, duration.inSeconds);
+    sendTimeDataToServer(token!);
     super.dispose();
   }
 
@@ -108,7 +115,21 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
             SliverAppBar(
               floating: true,
               pinned: true,
-              expandedHeight: _expandedHeight, // 동적 높이 적용
+              expandedHeight: _expandedHeight,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.home),
+                  tooltip: '메인으로',
+                  onPressed: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/main', // 메인 페이지 라우트 이름
+                          (Route<dynamic> route) => false, // 이전 라우트 모두 제거
+                    );
+                  },
+                ),
+              ],
+              // 동적 높이 적용
               flexibleSpace: FlexibleSpaceBar(
                 background: LayoutBuilder(
                   builder: (context, constraints) {
@@ -139,7 +160,8 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
                                 "${widget.data["bill_title"]}",
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                             ),
                             Row(
@@ -148,9 +170,11 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.picture_as_pdf, color: Colors.red),
+                                    Icon(Icons.picture_as_pdf,
+                                        color: Colors.red),
                                     GestureDetector(
-                                      onTap: () => _connectInternet(widget.data['pdf_url']),
+                                      onTap: () => _connectInternet(
+                                          widget.data['pdf_url']),
                                       child: Text(
                                         " PDF 다운로드",
                                         style: TextStyle(
@@ -164,9 +188,14 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Image.asset('assets/Icons/web.png', width: 25, height: 25,),
+                                    Image.asset(
+                                      'assets/Icons/web.png',
+                                      width: 25,
+                                      height: 25,
+                                    ),
                                     GestureDetector(
-                                      onTap: () => _connectInternet(widget.data['bill_url']),
+                                      onTap: () => _connectInternet(
+                                          widget.data['bill_url']),
                                       child: Text(
                                         " 의안·회의록 주소",
                                         style: TextStyle(
@@ -179,7 +208,6 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
                                 ),
                               ],
                             )
-
                           ],
                         ),
                       ),
@@ -191,7 +219,9 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
                 tabs: [
                   Tab(text: "요약문"),
                   Tab(text: "전문"),
-                  Tab(text: "추천",),
+                  Tab(
+                    text: "추천",
+                  ),
                   Tab(text: "댓글"),
                 ],
               ),
@@ -203,7 +233,7 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
               _fullTextTab(widget.data['bill_body']),
               Builder(
                 builder: (context) => SafeArea(
-                  child: RecommendationBoard(billId: widget.data['bill_id']),
+                  child: RecommendationBoard(billId: widget.data['bill_id'], enterTime: _enterTime,),
                 ),
               ),
               _commentTab(),
@@ -228,5 +258,4 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
   Widget _commentTab() {
     return Center(child: Text("댓글 목록"));
   }
-
 }

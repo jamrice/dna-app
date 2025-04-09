@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -37,7 +39,12 @@ class _SimpleNoticeBoardItemState extends State<SimpleNoticeBoardItem> {
     final url = Uri.parse(
         "http://20.39.187.232:8000/bills/all?page=1&items_per_page=10");
     try {
-      final response = await http.get(url);
+      final response = await http.get(url).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('데이터 로드 시간 초과');
+        }
+      );
       if (response.statusCode == 200) {
         final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
         if (decodedResponse is Map<String, dynamic> &&
@@ -47,6 +54,7 @@ class _SimpleNoticeBoardItemState extends State<SimpleNoticeBoardItem> {
       }
         return [];
     } catch (e) {
+      print("데이터 가져오기 오류: $e");
       return [];
     }
   }

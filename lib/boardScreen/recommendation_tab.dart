@@ -1,14 +1,17 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'dart:math' as math;
 import '../boardScreen/complex_notice_board.dart';
+import '../secure_storage/secure_storage_notifier.dart';
 
 class RecommendationBoard extends ConsumerStatefulWidget {
   final String billId;
+  final DateTime enterTime;
 
-  const RecommendationBoard({super.key, required this.billId});
+  const RecommendationBoard({super.key, required this.billId, required this.enterTime});
 
   @override
   ConsumerState<RecommendationBoard> createState() =>
@@ -31,6 +34,14 @@ class _RecommendationBoardState extends ConsumerState<RecommendationBoard> {
   Future<void> _initializeData() async {
     try {
       await fetchRecommandationBillDataFromServer();
+      final tokenState = ref.read(secureStorageProvider);
+      final hasToken = tokenState != null && tokenState.containsKey('ACCESS_TOKEN');
+
+      if (hasToken) {
+        token = tokenState['ACCESS_TOKEN'];
+      } else {
+        print("토큰이 없음, 로그인 필요");
+      }
     } catch (e) {
       print("초기화 중 오류 발생: $e");
     } finally {
@@ -39,6 +50,35 @@ class _RecommendationBoardState extends ConsumerState<RecommendationBoard> {
           isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> sendTimeDataToServer(String token) async {
+    final exitTime = DateTime.now();
+    final duration = exitTime.difference(widget.enterTime);
+    final url = Uri.parse("http://20.39.187.232:8000/page_visit/save");
+
+    final headers = {
+      'accept': 'application/json',
+      'access-token': token,
+      'Content-Type': 'application/json',
+    };
+
+    final body = jsonEncode({
+      "visit_duration": duration.inSeconds,
+      "page_id": _billId,
+    });
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode == 200) {
+        print("전송성공");
+      } else {
+        print("오류 상태 코드: ${response.statusCode}");
+        print("body: ${response.body}");
+      }
+    } catch (e) {
+      print("전송에러: $e");
     }
   }
 
@@ -98,6 +138,7 @@ class _RecommendationBoardState extends ConsumerState<RecommendationBoard> {
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () {
+              sendTimeDataToServer(token!);
               Navigator.push(context, MaterialPageRoute(
                 builder: (context) => ComplexNoticeBoard(data: data[index]),),);
             },
