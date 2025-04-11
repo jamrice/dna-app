@@ -25,7 +25,7 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
   void initState() {
     super.initState();
     _initializeData();
-    print(widget.data['bill_title']);
+    // print(widget.data['bill_title']);
     _enterTime = DateTime.now();
     _scrollController.addListener(_updateExpandedHeight);
   }
@@ -40,7 +40,8 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
 
       if (hasToken) {
         token = tokenState['ACCESS_TOKEN'];
-        print('complex: $token');
+        // print('complex: $token');
+        // print(widget.data['bill_id']);
       } else {
         print("토큰이 없습니다. 로그인이 필요합니다.");
       }

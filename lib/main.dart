@@ -60,8 +60,8 @@ class _HomePageState extends ConsumerState<HomePage> {
         tokenState != null && tokenState.containsKey('ACCESS_TOKEN');
     final TextEditingController _searchController = TextEditingController();
 
-    debugPrint('main.dart 현재 토큰 상태: $tokenState');
-    debugPrint('main.dart 토큰 존재 여부: $hasToken');
+    // debugPrint('main.dart 현재 토큰 상태: $tokenState');
+    // debugPrint('main.dart 토큰 존재 여부: $hasToken');
 
     return Scaffold(
       appBar: AppBar(
@@ -70,56 +70,28 @@ class _HomePageState extends ConsumerState<HomePage> {
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(Icons.ac_unit_rounded, size: 40),
+            //Icon(Icons.ac_unit_rounded, size: 40),
             SizedBox(width: 5),
-            Text("데일리국회"),
+            Text(
+              "데일리국회",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              debugPrint('refresh');
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 5),
-            child: ElevatedButton(
-              onPressed: () async {
-                if (!hasToken) {
-                  // 로그인 페이지로 이동
-                  final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const LoginPage()));
-
-                  if (result == true) {
-                    // 로그인 성공 후 토큰 상태 다시 확인
-                    setState(() {});
-                  }
-                } else {
-                  // 로그아웃 처리
-                  await ref
-                      .read(secureStorageProvider.notifier)
-                      .delete('ACCESS_TOKEN');
-                  setState(() {});
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('로그아웃 되었습니다')));
-                }
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.notifications),
+              onPressed: () {
+                debugPrint('refresh');
+                Scaffold.of(context).openEndDrawer();
               },
-              style: ElevatedButton.styleFrom(
-                fixedSize: const Size(85, 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              // child: hasToken ? IconButton(onPressed: () {}, icon: Icon(Icons.account_circle)),
-              child: Text(hasToken ? "로그아웃" : "로그인",
-                  style: const TextStyle(fontSize: 13, color: Colors.black)),
             ),
           ),
+          hasToken ? _buildDrawerButton() : _buildLoginButton(),
         ],
       ),
+      endDrawer: _buildDrawer(),
       body: FutureBuilder(
           future: ref.read(secureStorageProvider.notifier).load('ACCESS_TOKEN'),
           builder: (context, snapshot) {
@@ -132,8 +104,8 @@ class _HomePageState extends ConsumerState<HomePage> {
             final hasToken =
                 tokenState != null && tokenState.containsKey('ACCESS_TOKEN');
 
-            debugPrint('현재 토큰 상태: $tokenState');
-            debugPrint('토큰 존재 여부: $hasToken');
+            // debugPrint('현재 토큰 상태: $tokenState');
+            // debugPrint('토큰 존재 여부: $hasToken');
 
             return RefreshIndicator(
               onRefresh: () async {
@@ -271,6 +243,86 @@ class _HomePageState extends ConsumerState<HomePage> {
       decoration: BoxDecoration(
           color: Colors.black12, borderRadius: BorderRadius.circular(5)),
       child: SimpleNoticeBoardItem(),
+    );
+  }
+
+  Widget _buildLoginButton() {
+    return ElevatedButton(
+      onPressed: () async {
+        final result = await Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const LoginPage()));
+
+        if (result == true) {
+          // 로그인 성공 후 토큰 상태 다시 확인
+          setState(() {});
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        fixedSize: const Size(85, 20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      // child: hasToken ? IconButton(onPressed: () {}, icon: Icon(Icons.account_circle)),
+      child: Text("로그인",
+          style: const TextStyle(fontSize: 13, color: Colors.black)),
+    );
+  }
+
+  Widget _buildDrawerButton() {
+    return Builder(
+        builder: ((context) => IconButton(
+            onPressed: () {
+              Scaffold.of(context).openEndDrawer();
+            },
+            icon: Icon(Icons.person))));
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      width: 240,
+      child: ListView(
+        children: [
+          UserAccountsDrawerHeader(
+            currentAccountPicture: CircleAvatar(
+              backgroundImage: AssetImage('assets/Images/blue_house.webp'),
+            ),
+            accountName: Text("accountName"),
+            accountEmail: Text("accountEmail"),
+            decoration: BoxDecoration(color: Colors.grey[600]),
+          ),
+          ListTile(
+            title: const Text(
+              "개인정보 수정",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            onTap: () async {
+              await ref
+                  .read(secureStorageProvider.notifier)
+                  .delete('ACCESS_TOKEN');
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text('로그아웃 되었습니다'),
+              ));
+            },
+          ),
+          ListTile(
+            title: const Text(
+              "로그아웃",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.redAccent),
+            ),
+            onTap: () async {
+              await ref
+                  .read(secureStorageProvider.notifier)
+                  .delete('ACCESS_TOKEN');
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text('로그아웃 되었습니다'),
+              ));
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
     );
   }
 }

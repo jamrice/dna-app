@@ -35,7 +35,8 @@ class _SummaryBoardState extends ConsumerState<SummaryBoard> {
     try {
       // 토큰 상태를 Riverpod을 통해 직접 확인
       var tokenState = ref.read(secureStorageProvider);
-      var hasToken = tokenState != null && tokenState.containsKey('ACCESS_TOKEN');
+      var hasToken =
+          tokenState != null && tokenState.containsKey('ACCESS_TOKEN');
 
       if (!hasToken) {
         print("token is null reload");
@@ -60,23 +61,45 @@ class _SummaryBoardState extends ConsumerState<SummaryBoard> {
     }
   }
 
+  Future<int?> getViews(String billId) async {
+    final url = Uri.parse(
+        "http://20.39.187.232:8000/content/content_id?content_id=$billId");
+    final headers = {'accept': "application/json"};
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+
+        if (decoded["views"] != null) {
+          return decoded["views"];
+        } else {
+          print("조회수 필드가 응답에 없음");
+        }
+      } else {
+        print("오류 상태 코드: ${response.statusCode}");
+        print("응답 body: ${response.body}");
+      }
+    } catch (e) {
+      print("조회수 요청 중 오류 발생: $e");
+    }
+    return null;
+  }
+
   Future<void> fetchRecommandationDataFromServer(String token) async {
     final url = Uri.parse("http://20.39.187.232:8000/recommendation/user_id");
-    print("API 요청 시작: $url");
 
     try {
       final response = await http.get(url,
           headers: {'accept': 'application/json', 'access-token': token});
 
-      print("API 응답 상태 코드: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
-        print("응답 데이터 타입: ${decodedResponse.runtimeType}");
 
         if (decodedResponse is Map<String, dynamic> &&
             decodedResponse.containsKey("bills")) {
-          print("bills 개수: ${decodedResponse['bills'].length}");
 
           if (mounted) {
             setState(() {
@@ -116,13 +139,27 @@ class _SummaryBoardState extends ConsumerState<SummaryBoard> {
                       ),
                       SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
+                        onPressed: () async {
+                          final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => const LoginPage()));
+
+                          if (result == true) {
+                            // 로그인 성공 후 토큰 상태 다시 확인
+                            setState(() {});
+                          }
                         },
-                        child: Text("로그인하기"),
+                        style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(85, 20),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        // child: hasToken ? IconButton(onPressed: () {}, icon: Icon(Icons.account_circle)),
+                        child: Text("로그인",
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.black)),
                       ),
                     ],
                   ),
@@ -134,7 +171,8 @@ class _SummaryBoardState extends ConsumerState<SummaryBoard> {
                         children: [
                           Text(
                             "데이터를 불러올 수 없습니다",
-                            style: TextStyle(color: Colors.black87, fontSize: 16),
+                            style:
+                                TextStyle(color: Colors.black87, fontSize: 16),
                           ),
                           SizedBox(height: 16),
                           ElevatedButton(
@@ -143,7 +181,8 @@ class _SummaryBoardState extends ConsumerState<SummaryBoard> {
                                 isLoading = true;
                               });
                               final token = tokenState['ACCESS_TOKEN'];
-                              fetchRecommandationDataFromServer(token!).then((_) {
+                              fetchRecommandationDataFromServer(token!)
+                                  .then((_) {
                                 if (mounted) {
                                   setState(() {
                                     isLoading = false;
@@ -180,7 +219,8 @@ class _SummaryBoardState extends ConsumerState<SummaryBoard> {
                                 ),
                                 Container(
                                   margin: EdgeInsets.only(bottom: 10),
-                                  padding: EdgeInsets.all(10),
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 5, horizontal: 10),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[300],
                                     boxShadow: [
@@ -217,9 +257,19 @@ class _SummaryBoardState extends ConsumerState<SummaryBoard> {
                                               ),
                                             ),
                                           ),
-                                          Container(
-                                            child: Text("조회수: 124141회",
-                                                maxLines: 1),
+                                          FutureBuilder<int?>(
+                                            future: getViews(data[index]['bill_id']),
+                                            builder: (context, snapshot) {
+                                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                                return Text("조회수: ..."); // 로딩 중
+                                              } else if (snapshot.hasError) {
+                                                return Text("조회수: 오류");
+                                              } else if (snapshot.hasData) {
+                                                return Text("조회수: ${snapshot.data}회");
+                                              } else {
+                                                return Text("조회수: 없음");
+                                              }
+                                            },
                                           )
                                         ],
                                       )
