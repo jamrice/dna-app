@@ -217,6 +217,16 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
                 ),
               ),
               bottom: TabBar(
+                indicatorColor: Colors.grey[900],
+                indicatorSize: TabBarIndicatorSize.tab,
+                overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.pressed)) {
+                    return Colors.grey[300]; // 터치 시 나타나는 색상
+                  }
+                  return null;
+                }),
+                labelColor: Colors.black,
+                unselectedLabelColor: Colors.grey,
                 tabs: [
                   Tab(text: "요약문"),
                   Tab(text: "전문"),

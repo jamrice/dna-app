@@ -5,8 +5,8 @@ import 'boardScreen/notice_board.dart';
 import 'mainScreen/simple_notice_board.dart';
 import 'mainScreen/categoryItem.dart';
 import 'secure_storage/secure_storage_notifier.dart';
-import 'color.dart';
 import 'mainScreen/user_summary_board.dart';
+import 'mainScreen/account_drawer.dart';
 
 // 전역 네비게이션 키 정의
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -65,7 +65,8 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.grey[300],
+        backgroundColor: Colors.grey[600],
+        foregroundColor: Colors.white,
         automaticallyImplyLeading: false,
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -74,7 +75,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             SizedBox(width: 5),
             Text(
               "데일리국회",
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ],
         ),
@@ -89,9 +90,10 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
           ),
           hasToken ? _buildDrawerButton() : _buildLoginButton(),
+          SizedBox(width: 5,)
         ],
       ),
-      endDrawer: _buildDrawer(),
+      endDrawer: AccountDrawer(),
       body: FutureBuilder(
           future: ref.read(secureStorageProvider.notifier).load('ACCESS_TOKEN'),
           builder: (context, snapshot) {
@@ -108,6 +110,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             // debugPrint('토큰 존재 여부: $hasToken');
 
             return RefreshIndicator(
+              color: Colors.grey[700],
               onRefresh: () async {
                 setState(() {});
               },
@@ -276,53 +279,5 @@ class _HomePageState extends ConsumerState<HomePage> {
               Scaffold.of(context).openEndDrawer();
             },
             icon: Icon(Icons.person))));
-  }
-
-  Widget _buildDrawer() {
-    return Drawer(
-      width: 240,
-      child: ListView(
-        children: [
-          UserAccountsDrawerHeader(
-            currentAccountPicture: CircleAvatar(
-              backgroundImage: AssetImage('assets/Images/blue_house.webp'),
-            ),
-            accountName: Text("accountName"),
-            accountEmail: Text("accountEmail"),
-            decoration: BoxDecoration(color: Colors.grey[600]),
-          ),
-          ListTile(
-            title: const Text(
-              "개인정보 수정",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            onTap: () async {
-              await ref
-                  .read(secureStorageProvider.notifier)
-                  .delete('ACCESS_TOKEN');
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text('로그아웃 되었습니다'),
-              ));
-            },
-          ),
-          ListTile(
-            title: const Text(
-              "로그아웃",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, color: Colors.redAccent),
-            ),
-            onTap: () async {
-              await ref
-                  .read(secureStorageProvider.notifier)
-                  .delete('ACCESS_TOKEN');
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text('로그아웃 되었습니다'),
-              ));
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
-    );
   }
 }

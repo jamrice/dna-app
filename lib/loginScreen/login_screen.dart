@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -83,6 +85,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: encodedBody, // 올바른 형식으로 인코딩된 body
+        
+      )
+      .timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw TimeoutException("요청시간이 초과 되었습니다 네트워크 상태를 확인해주세요");
+          },
       );
 
       if (response.statusCode == 200) {
@@ -204,7 +213,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 40),
                 _isLoading
-                    ? const CircularProgressIndicator() // 로딩 인디케이터
+                    ? const CircularProgressIndicator(color: Colors.grey,) // 로딩 인디케이터
                     : OutlinedButton(
                     onPressed: _sendLoginDataGetToken, // 직접 토큰 요청 함수 호출
                     style: OutlinedButton.styleFrom(

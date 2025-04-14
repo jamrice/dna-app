@@ -159,7 +159,13 @@ class _RecommendationBoardState extends ConsumerState<RecommendationBoard> {
                       onPressed: () {
                         fetchRecommandationBillDataFromServer();
                       },
-                      child: Text("다시 시도"),
+                      style: ElevatedButton.styleFrom(
+                        fixedSize: const Size(105, 20),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: Text("다시 시도", style: TextStyle(color: Colors.grey[700]),),
                     ),
                   ],
                 ),

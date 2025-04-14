@@ -66,7 +66,7 @@ class _SimpleNoticeBoardItemState extends State<SimpleNoticeBoardItem> {
       future: _futureData,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator()); // 로딩 중
+          return Center(child: CircularProgressIndicator(color: Colors.grey,)); // 로딩 중
         }
         if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(
@@ -94,14 +94,6 @@ class _SimpleNoticeBoardItemState extends State<SimpleNoticeBoardItem> {
                     decoration: BoxDecoration(
                       color: boardColor,
                       borderRadius: BorderRadius.circular(8),
-                      // boxShadow: [ // ✅ 그림자 추가
-                      //   BoxShadow(
-                      //     color: Colors.black12, // 그림자 색상
-                      //     blurRadius: 8, // 흐림 정도
-                      //     spreadRadius: 0, // 퍼짐 정도
-                      //     offset: Offset(0, 1), // 그림자의 위치 (x, y)
-                      //   ),
-                      // ],
                     ),
                     child: Row(
                       children: [

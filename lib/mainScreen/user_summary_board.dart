@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../secure_storage/secure_storage_notifier.dart';
-import 'dart:math' as math;
 import '../boardScreen/complex_notice_board.dart';
 import '../loginScreen/login_screen.dart';
 
@@ -92,8 +91,13 @@ class _SummaryBoardState extends ConsumerState<SummaryBoard> {
 
     try {
       final response = await http.get(url,
-          headers: {'accept': 'application/json', 'access-token': token});
-
+          headers: {'accept': 'application/json', 'access-token': token})
+      .timeout(Duration(seconds: 10),
+        onTimeout: () {
+          print("요청 시간 초과");
+          return http.Response('Request Timeout', 408);
+        }
+      );
 
       if (response.statusCode == 200) {
         final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
@@ -190,7 +194,13 @@ class _SummaryBoardState extends ConsumerState<SummaryBoard> {
                                 }
                               });
                             },
-                            child: Text("다시 시도"),
+                            style: ElevatedButton.styleFrom(
+                              fixedSize: const Size(105, 20),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Text("다시 시도", style: TextStyle(color: Colors.grey[700]),),
                           ),
                         ],
                       ),
