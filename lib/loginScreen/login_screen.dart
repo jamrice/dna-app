@@ -15,7 +15,9 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("로그인"),
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.grey[600],
+        title: const Text("로그인", style: TextStyle(fontWeight: FontWeight.bold),),
       ),
       body: LoginScreen(),
     );
@@ -103,7 +105,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           await storage.save('ACCESS_TOKEN', accessToken);
 
           // 토큰 로드 확인 (디버깅용)
-          final tokenState = await storage.load("ACCESS_TOKEN");
+          //final tokenState = await storage.load("ACCESS_TOKEN");
           // print("✅ 저장된 토큰 확인: $tokenState");
 
           // UI 업데이트 및 성공 메시지 표시

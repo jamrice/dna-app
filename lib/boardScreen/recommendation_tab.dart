@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'dart:math' as math;
 import '../boardScreen/complex_notice_board.dart';
 import '../secure_storage/secure_storage_notifier.dart';
 
@@ -42,10 +40,10 @@ class _RecommendationBoardState extends ConsumerState<RecommendationBoard> {
       if (hasToken) {
         token = tokenState['ACCESS_TOKEN'];
       } else {
-        print("토큰이 없음, 로그인 필요");
+        debugPrint("토큰이 없음, 로그인 필요");
       }
     } catch (e) {
-      print("초기화 중 오류 발생: $e");
+      debugPrint("초기화 중 오류 발생: $e");
     } finally {
       if (mounted) {
         setState(() {
@@ -70,11 +68,11 @@ class _RecommendationBoardState extends ConsumerState<RecommendationBoard> {
           return decodedResponse['views'];
         }
       } else {
-        print("오류 상태 코드: ${response.statusCode}");
-        print("body: ${response.body}");
+        debugPrint("오류 상태 코드: ${response.statusCode}");
+        debugPrint("body: ${response.body}");
       }
     } catch (e) {
-      print("조회수 Error: $e");
+      debugPrint("조회수 Error: $e");
     }
     return null;
   }
@@ -108,11 +106,11 @@ class _RecommendationBoardState extends ConsumerState<RecommendationBoard> {
           }
         }
       } else {
-        print("오류 상태 코드: ${response.statusCode}");
-        print("body: ${response.body}");
+        debugPrint("오류 상태 코드: ${response.statusCode}");
+        debugPrint("body: ${response.body}");
       }
     } catch (e) {
-      print("전송에러: $e");
+      debugPrint("전송에러: $e");
     }
   }
 
@@ -134,10 +132,10 @@ class _RecommendationBoardState extends ConsumerState<RecommendationBoard> {
           }
         }
       } else {
-        print("오류 상태 코드: ${response.statusCode}");
+        debugPrint("오류 상태 코드: ${response.statusCode}");
       }
     } catch (e) {
-      print("데이터 가져오기 오류: $e");
+      debugPrint("데이터 가져오기 오류: $e");
     }
   }
 
@@ -190,7 +188,7 @@ class _RecommendationBoardState extends ConsumerState<RecommendationBoard> {
                     },
                     child: Column(
                       children: [
-                        Container(
+                        SizedBox(
                           width: double.infinity,
                           height: 180,
                           child: Image.asset(

@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../secure_storage/secure_storage_notifier.dart';
 import 'package:http/http.dart' as http;
 import 'recommendation_tab.dart';
+import 'package:toastification/toastification.dart';
 
 class ComplexNoticeBoard extends ConsumerStatefulWidget {
   final Map<String, dynamic> data;
@@ -20,12 +21,12 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
   double _expandedHeight = 260.0; // 기본 확장 높이
   late DateTime _enterTime;
   String? token = '';
+  bool likes = false;
 
   @override
   void initState() {
     super.initState();
     _initializeData();
-    // print(widget.data['bill_title']);
     _enterTime = DateTime.now();
     _scrollController.addListener(_updateExpandedHeight);
   }
@@ -43,10 +44,10 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
         // print('complex: $token');
         // print(widget.data['bill_id']);
       } else {
-        print("토큰이 없습니다. 로그인이 필요합니다.");
+        debugPrint("토큰이 없습니다. 로그인이 필요합니다.");
       }
     } catch (e) {
-      print("초기화 중 오류 발생: $e");
+      debugPrint("초기화 중 오류 발생: $e");
     }
   }
 
@@ -55,7 +56,7 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
     final duration = exitTime.difference(_enterTime);
 
     final url = Uri.parse("http://20.39.187.232:8000/page_visit/save");
-    print("token: $token");
+    debugPrint("token: $token");
 
     final headers = {
       'accept': 'application/json',
@@ -71,14 +72,16 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
     try {
       final response = await http.post(url, headers: headers, body: body);
       if (response.statusCode == 200) {
-        print("전송성공");
+        debugPrint("시간데이터 전송성공");
+        debugPrint(token);
+        debugPrint(widget.data['bill_id']);
       } else {
-        print("오류 상태 코드: ${response.statusCode}");
-        print("body: ${response.body}");
-        print(widget.data['bill_id']);
+        debugPrint("오류 상태 코드: ${response.statusCode}");
+        debugPrint("body: ${response.body}");
+        debugPrint(widget.data['bill_id']);
       }
     } catch (e) {
-      print("전송에러: $e");
+      debugPrint("전송에러: $e");
     }
   }
 
@@ -105,6 +108,35 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
     }
   }
 
+  Future<void> _sendLikes(bool likes, String token) async {
+    var url = Uri.parse("");
+
+    if (likes) {
+      url = Uri.parse(
+          "http://20.39.187.232:8000/like/like?content_id=${widget.data['bill_id']}");
+    } else {
+      url = Uri.parse(
+          "http://20.39.187.232:8000/like/like_cancel?content_id=${widget.data['bill_id']}");
+    }
+
+    final headers = {
+      'accept': 'application/json',
+      'access-token': token,
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+      if (response.statusCode == 200) {
+
+      } else {
+        debugPrint("오류 상태 코드: ${response.statusCode}");
+        debugPrint("body: ${response.body}");
+      }
+    } catch (e) {
+      debugPrint("전송에러: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -119,13 +151,37 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
               expandedHeight: _expandedHeight,
               actions: [
                 IconButton(
+                  icon: likes
+                      ? Icon(
+                          Icons.favorite,
+                          color: Colors.red,
+                        )
+                      : Icon(
+                          Icons.favorite_border,
+                        ),
+                  tooltip: '좋아요',
+                  onPressed: () {
+                    setState(() {
+                      likes = !likes;
+                      _sendLikes(likes, token!);
+                      toastification.show(
+                        context: context,
+                        title: likes ? Text("좋아요 목록에 추가") : Text("좋아요 목록에서 삭제"),
+                        style: ToastificationStyle.simple,
+                        alignment: Alignment.bottomCenter,
+                        autoCloseDuration: const Duration(seconds: 2),
+                      );
+                    });
+                  },
+                ),
+                IconButton(
                   icon: const Icon(Icons.home),
                   tooltip: '메인으로',
                   onPressed: () {
                     Navigator.pushNamedAndRemoveUntil(
                       context,
                       '/main', // 메인 페이지 라우트 이름
-                          (Route<dynamic> route) => false, // 이전 라우트 모두 제거
+                      (Route<dynamic> route) => false, // 이전 라우트 모두 제거
                     );
                   },
                 ),
@@ -219,7 +275,8 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
               bottom: TabBar(
                 indicatorColor: Colors.grey[900],
                 indicatorSize: TabBarIndicatorSize.tab,
-                overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+                overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                    (Set<WidgetState> states) {
                   if (states.contains(WidgetState.pressed)) {
                     return Colors.grey[300]; // 터치 시 나타나는 색상
                   }
@@ -244,7 +301,10 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
               _fullTextTab(widget.data['bill_body']),
               Builder(
                 builder: (context) => SafeArea(
-                  child: RecommendationBoard(billId: widget.data['bill_id'], enterTime: _enterTime,),
+                  child: RecommendationBoard(
+                    billId: widget.data['bill_id'],
+                    enterTime: _enterTime,
+                  ),
                 ),
               ),
               _commentTab(),

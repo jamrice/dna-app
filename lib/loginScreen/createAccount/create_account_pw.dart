@@ -70,6 +70,8 @@ class _CreateAccountPwPageState extends State<CreateAccountPwPage> {
                     borderSide:
                         BorderSide(color: Colors.grey.shade700, width: 2),
                   ),
+                  enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey)),
                   suffixIcon: IconButton(
                     icon: Icon(
                         _isObscure ? Icons.visibility_off : Icons.visibility),
@@ -109,15 +111,18 @@ class _CreateAccountPwPageState extends State<CreateAccountPwPage> {
                   labelStyle: TextStyle(color: Colors.black),
                   border: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.grey)),
+                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
                   focusedBorder: OutlineInputBorder(
                     borderSide:
                         BorderSide(color: Colors.grey.shade700, width: 2),
                   ),
                   helperText: _confirmPasswordController.text.isNotEmpty &&
-                      _confirmPasswordController.text == _passwordController.text
+                          _confirmPasswordController.text ==
+                              _passwordController.text
                       ? "비밀번호가 일치합니다"
                       : null,
-                  helperStyle: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                  helperStyle: TextStyle(
+                      color: Colors.blue, fontWeight: FontWeight.bold),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -132,12 +137,19 @@ class _CreateAccountPwPageState extends State<CreateAccountPwPage> {
               SizedBox(height: 40),
               OutlinedButton(
                   onPressed: () {
-                    if (_formKey.currentState!.validate() && _confirmPasswordController.text.isNotEmpty) {
+                    if (_formKey.currentState!.validate() &&
+                        _confirmPasswordController.text.isNotEmpty) {
                       _accountInfo["password"] = _passwordController.text;
                       print("Updated accountInfo: $_accountInfo");
-                      print("bcrypt1: ${BCrypt.hashpw(_passwordController.text, BCrypt.gensalt())}");
-                      print("bcrypt2: ${BCrypt.hashpw(_passwordController.text, BCrypt.gensalt())}");
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => CreateAccountOthersPage(accountInfo: _accountInfo)));
+                      print(
+                          "bcrypt1: ${BCrypt.hashpw(_passwordController.text, BCrypt.gensalt())}");
+                      print(
+                          "bcrypt2: ${BCrypt.hashpw(_passwordController.text, BCrypt.gensalt())}");
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CreateAccountOthersPage(
+                                  accountInfo: _accountInfo)));
                     }
                   },
                   style: OutlinedButton.styleFrom(

@@ -6,22 +6,45 @@ import 'mainScreen/simple_notice_board.dart';
 import 'mainScreen/categoryItem.dart';
 import 'secure_storage/secure_storage_notifier.dart';
 import 'mainScreen/user_summary_board.dart';
-import 'mainScreen/account_drawer.dart';
+import 'drawerScreen/account_drawer.dart';
 
 // 전역 네비게이션 키 정의
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
-  // WidgetsFlutterBinding.ensureInitialized()// Flutter 바인딩 초기화 (필요시)
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+
+  final Color primaryGray = Colors.grey[700]!;
+  final Color backgroundGray = Colors.grey[200]!;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        primaryColor: primaryGray,
+        scaffoldBackgroundColor: backgroundGray,
+        appBarTheme: AppBarTheme(
+          color: Colors.white,
+          foregroundColor: Colors.grey[700],
+        ),
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          primary: primaryGray,
+          secondary: Colors.grey[600],
+          surface: backgroundGray,
+        ),
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(color: Colors.grey[900]),
+          bodyMedium: TextStyle(color: Colors.grey[800]),
+        ),
+        buttonTheme: ButtonThemeData(
+          buttonColor: Colors.grey[700],
+          textTheme: ButtonTextTheme.primary,
+        ),
+      ),
       navigatorKey: navigatorKey,
       initialRoute: '/main',
       routes: {'/main': (context) => HomePage()},
@@ -205,9 +228,9 @@ class _HomePageState extends ConsumerState<HomePage> {
           if (showMore)
             GestureDetector(
               onTap: onTap ?? () => debugPrint("자세히 보기 클릭"),
-              child: const Text("자세히 보기",
+              child: const Text("자세히 보기 ",
                   style: TextStyle(
-                      color: Colors.grey, fontWeight: FontWeight.bold)),
+                      color: Colors.grey, fontWeight: FontWeight.bold), ),
             ),
         ],
       ),

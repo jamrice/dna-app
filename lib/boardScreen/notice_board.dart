@@ -9,18 +9,18 @@ class NoticeBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: NoticeBoardItem());
+    return Scaffold(body: NoticeBoardPage());
   }
 }
 
-class NoticeBoardItem extends StatefulWidget {
-  const NoticeBoardItem({super.key});
+class NoticeBoardPage extends StatefulWidget {
+  const NoticeBoardPage({super.key});
 
   @override
-  _NoticeBoardItemState createState() => _NoticeBoardItemState();
+  _NoticeBoardPage createState() => _NoticeBoardPage();
 }
 
-class _NoticeBoardItemState extends State<NoticeBoardItem> {
+class _NoticeBoardPage extends State<NoticeBoardPage> {
   final PageController _pageController = PageController();
   static const int itemsPerPage = 10; // 한 페이지당 아이템 개수
   int currentPage = 0;
@@ -70,7 +70,7 @@ class _NoticeBoardItemState extends State<NoticeBoardItem> {
 
   @override
   Widget build(BuildContext context) {
-    int _numPages = (totalCount / itemsPerPage).ceil();
+    int numPages = (totalCount / itemsPerPage).ceil();
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -97,7 +97,7 @@ class _NoticeBoardItemState extends State<NoticeBoardItem> {
                     Expanded(
                       child: PageView.builder(
                         controller: _pageController,
-                        itemCount: _numPages,
+                        itemCount: numPages,
                         onPageChanged: (pageIndex) {
                           setState(() {
                             currentPage = pageIndex;
@@ -113,7 +113,7 @@ class _NoticeBoardItemState extends State<NoticeBoardItem> {
                                 : ListView.builder(
                                     itemCount: itemCount,
                                     itemBuilder: (context, itemIndex) {
-                                      return noticeBoardItem(
+                                      return NoticeBoardItem(
                                           bills[itemIndex]); // 데이터 전달
                                     },
                                   ),
@@ -124,11 +124,11 @@ class _NoticeBoardItemState extends State<NoticeBoardItem> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(
-                        _numPages > 5 ? 5 : _numPages,
+                        numPages > 5 ? 5 : numPages,
                         (index) {
                           int visibleIndex;
 
-                          if (_numPages <= 5) {
+                          if (numPages <= 5) {
                             // 전체 페이지가 5 이하일 경우 그냥 출력
                             visibleIndex = index;
                           } else {
@@ -136,16 +136,16 @@ class _NoticeBoardItemState extends State<NoticeBoardItem> {
                             if (currentPage <= 2) {
                               // 초반 페이지(0,1,2)에서는 처음 5개를 고정
                               visibleIndex = index;
-                            } else if (currentPage >= _numPages - 3) {
+                            } else if (currentPage >= numPages - 3) {
                               // 마지막 페이지 근처에서는 마지막 5개를 고정
-                              visibleIndex = _numPages - 5 + index;
+                              visibleIndex = numPages - 5 + index;
                             } else {
                               // 그 외의 경우, currentPage를 중앙에 배치
                               visibleIndex = currentPage - 2 + index;
                             }
 
                             // 마지막 페이지가 전체 페이지 수보다 넘지 않도록 처리
-                            visibleIndex = visibleIndex.clamp(0, _numPages - 1);
+                            visibleIndex = visibleIndex.clamp(0, numPages - 1);
                           }
 
                           return GestureDetector(
@@ -183,10 +183,39 @@ class _NoticeBoardItemState extends State<NoticeBoardItem> {
   }
 }
 
-class noticeBoardItem extends StatelessWidget {
+class NoticeBoardItem extends StatelessWidget {
   final dynamic itemData;
 
-  noticeBoardItem(this.itemData, {Key? key}) : super(key: key);
+  const NoticeBoardItem(this.itemData, {super.key});
+
+  Future<List<int>?> getViews(String billId) async {
+    List<int> likesViewsList = [];
+    final url = Uri.parse(
+        "http://20.39.187.232:8000/content/content_id?content_id=$billId");
+    final headers = {'accept': "application/json"};
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+
+        if ((decoded["likes"] != null) &&(decoded["views"] != null)) {
+          likesViewsList.add(decoded["likes"]);
+          likesViewsList.add(decoded["views"]);
+          return likesViewsList;
+        } else {
+          print("조회수 필드가 응답에 없음");
+        }
+      } else {
+        print("오류 상태 코드: ${response.statusCode}");
+        print("응답 body: ${response.body}");
+      }
+    } catch (e) {
+      print("조회수 요청 중 오류 발생: $e");
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -245,21 +274,20 @@ class noticeBoardItem extends StatelessWidget {
                                     fontSize: 13, color: Colors.black),
                               ),
                             ),
-                            Row(
-                              children: [
-                                Icon(Icons.favorite, size: 16),
-                                SizedBox(width: 5),
-                                Text("${itemData['likes']}",
-                                    style: TextStyle(
-                                        fontSize: 13, color: Colors.black)),
-                                SizedBox(width: 5),
-                                Icon(Icons.remove_red_eye, size: 16),
-                                SizedBox(width: 5),
-                                Text("${itemData['views']}",
-                                    style: TextStyle(
-                                        fontSize: 13, color: Colors.black)),
-                              ],
-                            ),
+                            FutureBuilder<List<int>?>(
+                              future: getViews(itemData['bill_id']),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return Text("조회수: ..."); // 로딩 중
+                                } else if (snapshot.hasError) {
+                                  return Text("조회수: 오류");
+                                } else if (snapshot.hasData) {
+                                  return _buildLikesViewsText(snapshot.data!);
+                                } else {
+                                  return Text("조회수: 없음");
+                                }
+                              },
+                            )
                           ],
                         ),
                       ),
@@ -271,6 +299,23 @@ class noticeBoardItem extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+  Widget _buildLikesViewsText(List<int> data) {
+    return Row(
+      children: [
+        Icon(Icons.favorite, size: 16),
+        SizedBox(width: 5),
+        Text("${data[0]}",
+            style: TextStyle(
+                fontSize: 13, color: Colors.black)),
+        SizedBox(width: 5),
+        Icon(Icons.remove_red_eye_rounded, size: 16),
+        SizedBox(width: 5),
+        Text("${data[1]}",
+            style: TextStyle(
+                fontSize: 13, color: Colors.black)),
+      ],
     );
   }
 }

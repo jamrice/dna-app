@@ -6,18 +6,18 @@ class Categoryitem extends StatelessWidget {
 
   // 📌 아이콘, 텍스트, 동작 포함된 리스트
   final List<Map<String, dynamic>> items = [
-    {"icon": Icons.home, "text": "법률", "action": () => print("홈 클릭됨")},
-    {"icon": Icons.star, "text": "즐겨찾기", "action": () => print("즐겨찾기 클릭됨")},
-    {"icon": Icons.settings, "text": "설정", "action": () => print("설정 클릭됨")},
-    {"icon": Icons.person, "text": "프로필", "action": () => print("프로필 클릭됨")},
-    {"icon": Icons.shopping_cart, "text": "장바구니", "action": () => print("장바구니 클릭됨")},
-    {"icon": Icons.favorite, "text": "좋아요", "action": () => print("좋아요 클릭됨")},
-    {"icon": Icons.message, "text": "메시지", "action": () => print("메시지 클릭됨")},
-    {"icon": Icons.notifications, "text": "알림", "action": () => print("알림 클릭됨")},
-    {"icon": Icons.camera, "text": "카메라", "action": () => print("카메라 클릭됨")},
-    {"icon": Icons.map, "text": "지도", "action": () => print("지도 클릭됨")},
-    {"icon": Icons.phone, "text": "전화", "action": () => print("전화 클릭됨")},
-    {"icon": Icons.music_note, "text": "음악", "action": () => print("음악 클릭됨")},
+    {"icon": Icons.balance_outlined, "text": "법률", "action": () => print("홈 클릭됨")},
+    {"icon": Icons.currency_bitcoin, "text": "예산 및 재정", "action": () => print("즐겨찾기 클릭됨")},
+    {"icon": Icons.fort, "text": "외교, 국방", "action": () => print("설정 클릭됨")},
+    {"icon": Icons.money, "text": "경제, 산업", "action": () => print("프로필 클릭됨")},
+    {"icon": Icons.shopping_cart, "text": "사회복지", "action": () => print("장바구니 클릭됨")},
+    {"icon": Icons.eco, "text": "환경, 에너지", "action": () => print("좋아요 클릭됨")},
+    {"icon": Icons.account_balance, "text": "행정, 정부 운영", "action": () => print("메시지 클릭됨")},
+    {"icon": Icons.balance_outlined, "text": "사법, 법치", "action": () => print("알림 클릭됨")},
+    {"icon": Icons.biotech, "text": "과학기술, 정보", "action": () => print("카메라 클릭됨")},
+    {"icon": Icons.sports_soccer, "text": "문화, 체육", "action": () => print("지도 클릭됨")},
+    {"icon": Icons.account_balance_outlined, "text": "국회 운영", "action": () => print("전화 클릭됨")},
+    {"icon": Icons.more_horiz, "text": "기타", "action": () => print("음악 클릭됨")},
   ];
 
   @override

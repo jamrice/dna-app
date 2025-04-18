@@ -11,7 +11,6 @@ class CreateAccountPage extends StatefulWidget {
 
 class _CreateAccountPageState extends State<CreateAccountPage> {
   final TextEditingController _emailController = TextEditingController();
-  final FocusNode _emailFocus = FocusNode();
   String? _emailHelperText;
   bool _isEmailValid = false;
 
@@ -139,7 +138,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
           ),
         ),
       ),
-
     );
   }
 }

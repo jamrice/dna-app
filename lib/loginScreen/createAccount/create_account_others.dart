@@ -15,7 +15,6 @@ class CreateAccountOthersPage extends StatefulWidget {
 }
 
 class _CreateAccountOthersPageState extends State<CreateAccountOthersPage> {
-  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _birthController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
