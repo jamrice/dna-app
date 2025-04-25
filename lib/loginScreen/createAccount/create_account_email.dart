@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'create_account_pw.dart';
 import 'package:dna/color.dart';
+import 'package:http/http.dart' as http;
 
 class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
@@ -13,6 +15,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   final TextEditingController _emailController = TextEditingController();
   String? _emailHelperText;
   bool _isEmailValid = false;
+  var _checkEmail = false;
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -23,8 +26,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         _isEmailValid = false;
       });
     } else {
-      String pattern =
-          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+      String pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
       RegExp regExp = RegExp(pattern);
 
       if (!regExp.hasMatch(value)) {
@@ -41,7 +43,53 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     }
   }
 
-  final Map<String, dynamic>_accountInfo = {};
+  Widget _showDialog() {
+    return AlertDialog(
+      title: Text(
+        "이메일 중복 확인",
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      ),
+      content: Text("이미 존재하는 이메일입니다."),
+      actions: [
+        SizedBox(
+          width: double.infinity,
+          child: TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text("확인"),
+          ),
+        )
+      ],
+      actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+    );
+  }
+
+  Future<void> checkEmail(String email) async {
+    final url = Uri.parse(
+        "http://20.39.187.232:8000/api/auth/users/check-email?email=$email");
+
+    final header = {'accept': 'application/json'};
+
+    try {
+      final response = await http.get(url, headers: header);
+
+      if (response.statusCode == 200) {
+        final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
+        if (decodedResponse is Map<String, dynamic> &&
+            decodedResponse.containsKey("is_available")) {
+          debugPrint(decodedResponse["is_available"].toString());
+          _checkEmail = decodedResponse['is_available'];
+        }
+      } else {
+        _checkEmail = false;
+      }
+    } catch (e) {
+      debugPrint("전송에러: $e");
+    }
+  }
+
+  final Map<String, dynamic> _accountInfo = {};
 
   @override
   Widget build(BuildContext context) {
@@ -82,11 +130,12 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     labelText: "이메일",
                     labelStyle: TextStyle(color: Colors.grey),
                     hintText: "이메일을 입력하세요",
-                    border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
                     focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey, width: 2)),
-                    enabledBorder:
-                    OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
                     helperText: _emailHelperText,
                     helperStyle: TextStyle(
                       color: _emailHelperText == '사용 가능한 이메일입니다.'
@@ -94,7 +143,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                           : Colors.red, // 유효하면 초록색, 아니면 빨간색
                     ),
                   ),
-                  onChanged: (value) => validateEmail(value),
+                  onChanged: (value) => {
+                    validateEmail(value),
+                    checkEmail(value),
+                  },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "이메일을 입력하세요.";
@@ -110,19 +162,28 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                   },
                 ),
               ),
-              SizedBox(height: 40,),
+              SizedBox(
+                height: 40,
+              ),
               OutlinedButton(
                 onPressed: () {
                   print(_isEmailValid);
                   print(_accountInfo);
                   if (_isEmailValid) {
                     _accountInfo["email"] = _emailController.text;
-                    print("accountInfo: ${_accountInfo}");
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                CreateAccountPwPage(accountInfo: _accountInfo)));
+                    debugPrint("accountInfo: $_accountInfo");
+                    debugPrint("checkEmail: $_checkEmail");
+                    if (_checkEmail) {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CreateAccountPwPage(
+                                  accountInfo: _accountInfo)));
+                    } else {
+                      showDialog(
+                          context: context,
+                          builder: (context) => _showDialog());
+                    }
                   }
                 },
                 style: OutlinedButton.styleFrom(

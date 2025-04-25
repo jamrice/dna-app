@@ -41,6 +41,7 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
 
       if (hasToken) {
         token = tokenState['ACCESS_TOKEN'];
+        _checkLikes();
         // print('complex: $token');
         // print(widget.data['bill_id']);
       } else {
@@ -75,10 +76,37 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
         debugPrint("시간데이터 전송성공");
         debugPrint(token);
         debugPrint(widget.data['bill_id']);
+        debugPrint(widget.data['id'].toString());
       } else {
         debugPrint("오류 상태 코드: ${response.statusCode}");
         debugPrint("body: ${response.body}");
         debugPrint(widget.data['bill_id']);
+      }
+    } catch (e) {
+      debugPrint("전송에러: $e");
+    }
+  }
+
+  void _checkLikes() async {
+    final url = Uri.parse(
+        "http://20.39.187.232:8000/like/get_like?content_id=${widget.data['bill_id']}");
+
+    final headers = {
+      'accept': 'application/json',
+      'access-token': token!,
+    };
+
+    try {
+      final response = await http.get(headers: headers, url);
+      if (response.statusCode == 200) {
+        final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
+        if (decodedResponse is Map<String, dynamic> &&
+            decodedResponse.containsKey("like_type")) {
+          //debugPrint("likes check 성공");
+          setState(() {
+            likes = decodedResponse['like_type'];
+          });
+        }
       }
     } catch (e) {
       debugPrint("전송에러: $e");
@@ -127,7 +155,6 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
     try {
       final response = await http.get(url, headers: headers);
       if (response.statusCode == 200) {
-
       } else {
         debugPrint("오류 상태 코드: ${response.statusCode}");
         debugPrint("body: ${response.body}");

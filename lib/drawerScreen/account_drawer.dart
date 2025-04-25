@@ -61,7 +61,7 @@ class AccountDrawerState extends ConsumerState<AccountDrawer> {
           debugPrint(decodedResponse['user'].toString());
           setState(() {
             nickname = decodedResponse['user']['name'];
-            email = decodedResponse['user']['id'];
+            email = decodedResponse['user']['email'];
           });
         }
       } else {

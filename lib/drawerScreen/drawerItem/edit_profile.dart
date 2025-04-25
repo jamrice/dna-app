@@ -19,8 +19,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _addressDetailController =
-      TextEditingController();
+  final TextEditingController _addressDetailController = TextEditingController();
   final TextEditingController _birthdayController = TextEditingController();
 
   @override
@@ -72,9 +71,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           debugPrint(decodedResponse['user'].toString());
           setState(() {
             _nicknameController.text = decodedResponse['user']['name'];
-            _emailController.text = decodedResponse['user']['id'];
+            _emailController.text = decodedResponse['user']['email'];
             _addressController.text = decodedResponse['user']['address'];
-            // _addressDetailController.text = decodedResponse['user']['address_detail'];
+            _addressDetailController.text = decodedResponse['user']['address_detail'];
+            _birthdayController.text = decodedResponse['user']['birthday'];
           });
         }
       } else {
