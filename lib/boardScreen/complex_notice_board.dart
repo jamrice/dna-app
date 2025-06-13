@@ -6,6 +6,7 @@ import '../secure_storage/secure_storage_notifier.dart';
 import 'package:http/http.dart' as http;
 import 'recommendation_tab.dart';
 import 'package:toastification/toastification.dart';
+import 'package:dna/api_address.dart';
 
 class ComplexNoticeBoard extends ConsumerStatefulWidget {
   final Map<String, dynamic> data;
@@ -56,7 +57,7 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
     final exitTime = DateTime.now();
     final duration = exitTime.difference(_enterTime);
 
-    final url = Uri.parse("http://20.39.187.232:8000/page_visit/save");
+    final url = Uri.parse("${MainServer.baseUrl}:${MainServer.port}/page_visit/save");
     debugPrint("token: $token");
 
     final headers = {
@@ -89,7 +90,7 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
 
   void _checkLikes() async {
     final url = Uri.parse(
-        "http://20.39.187.232:8000/like/get_like?content_id=${widget.data['bill_id']}");
+        "${MainServer.baseUrl}:${MainServer.port}/like/get_like?content_id=${widget.data['bill_id']}");
 
     final headers = {
       'accept': 'application/json',
@@ -141,10 +142,10 @@ class _ComplexNoticeBoardState extends ConsumerState<ComplexNoticeBoard> {
 
     if (likes) {
       url = Uri.parse(
-          "http://20.39.187.232:8000/like/like?content_id=${widget.data['bill_id']}");
+          "${MainServer.baseUrl}:${MainServer.port}/like/like?content_id=${widget.data['bill_id']}");
     } else {
       url = Uri.parse(
-          "http://20.39.187.232:8000/like/like_cancel?content_id=${widget.data['bill_id']}");
+          "${MainServer.baseUrl}:${MainServer.port}/like/like_cancel?content_id=${widget.data['bill_id']}");
     }
 
     final headers = {

@@ -7,11 +7,15 @@ import 'mainScreen/categoryItem.dart';
 import 'secure_storage/secure_storage_notifier.dart';
 import 'mainScreen/user_summary_board.dart';
 import 'drawerScreen/account_drawer.dart';
+import 'package:naver_login_sdk/naver_login_sdk.dart';
 
 // 전역 네비게이션 키 정의
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  NaverLoginSDK.initialize(clientId: "rVZ2zxSCHW280r1VGNVi", clientSecret: "_lb16dgUH1");
   runApp(ProviderScope(child: MyApp()));
 }
 
@@ -245,6 +249,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.symmetric(horizontal: 3),
       decoration: BoxDecoration(
           color: Colors.black12, borderRadius: BorderRadius.circular(5)),
       child: const Column(
@@ -265,6 +270,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Container(
       width: double.infinity,
       height: 245,
+      margin: EdgeInsets.symmetric(horizontal: 3),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
           color: Colors.black12, borderRadius: BorderRadius.circular(5)),

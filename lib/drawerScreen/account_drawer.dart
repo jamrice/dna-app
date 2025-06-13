@@ -5,6 +5,7 @@ import 'package:dna/secure_storage/secure_storage_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'drawerItem/edit_profile.dart';
 import 'drawerItem/likes_list.dart';
+import 'package:dna/api_address.dart';
 
 class AccountDrawer extends ConsumerStatefulWidget {
   const AccountDrawer({super.key});
@@ -44,7 +45,7 @@ class AccountDrawerState extends ConsumerState<AccountDrawer> {
 
   Future<void> _getProfile(String token) async {
     final url =
-    Uri.parse("http://20.39.187.232:8000/api/auth/users/auth/profile-get");
+    Uri.parse("${MainServer.baseUrl}:${MainServer.port}/API/auth/users/auth/profile-get");
     final headers = {
       'accept': 'application/json',
       'access-token': token,

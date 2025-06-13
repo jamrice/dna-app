@@ -3,6 +3,7 @@ import 'package:dna/color.dart';
 import 'package:kpostal/kpostal.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:dna/api_address.dart';
 
 class CreateAccountOthersPage extends StatefulWidget {
   final Map<String, dynamic> accountInfo;
@@ -52,7 +53,7 @@ class _CreateAccountOthersPageState extends State<CreateAccountOthersPage> {
   Future<void> _sendUserData() async {
     // ✅ FastAPI 서버 URL
     final String url =
-        'http://20.39.187.232:8000/api/auth/users'; // 실제 API 주소 입력
+        '${MainServer.baseUrl}:${MainServer.port}/api/auth/users'; // 실제 API 주소 입력
 
     try {
       // ✅ HTTP POST 요청 보내기

@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
             width: 280,
             height: 40,
             child: ElevatedButton(
-                onPressed: _handleSignIn,
+                onPressed: GoogleSignIn().signIn,
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),

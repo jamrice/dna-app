@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'create_account_pw.dart';
 import 'package:dna/color.dart';
 import 'package:http/http.dart' as http;
+import 'package:dna/api_address.dart';
 
 class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
@@ -67,7 +68,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
   Future<void> checkEmail(String email) async {
     final url = Uri.parse(
-        "http://20.39.187.232:8000/api/auth/users/check-email?email=$email");
+        "${MainServer.baseUrl}:${MainServer.port}/api/auth/users/check-email?email=$email");
 
     final header = {'accept': 'application/json'};
 

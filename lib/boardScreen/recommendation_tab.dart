@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../boardScreen/complex_notice_board.dart';
 import '../secure_storage/secure_storage_notifier.dart';
+import 'package:dna/api_address.dart';
 
 class RecommendationBoard extends ConsumerStatefulWidget {
   final String billId;
@@ -55,7 +56,7 @@ class _RecommendationBoardState extends ConsumerState<RecommendationBoard> {
 
   Future<int?> getViews(String billId) async {
     final url = Uri.parse(
-        "http://20.39.187.232:8000/content/content_id?content_id=$billId");
+        "${MainServer.baseUrl}:${MainServer.port}/content/content_id?content_id=$billId");
     final headers = {'accept': "application/json"};
 
     try {
@@ -80,7 +81,7 @@ class _RecommendationBoardState extends ConsumerState<RecommendationBoard> {
   Future<void> sendTimeDataToServer(String token) async {
     final exitTime = DateTime.now();
     final duration = exitTime.difference(widget.enterTime);
-    final url = Uri.parse("http://20.39.187.232:8000/page_visit/save");
+    final url = Uri.parse("${MainServer.baseUrl}:${MainServer.port}/page_visit/save");
 
     final headers = {
       'accept': 'application/json',
@@ -116,7 +117,7 @@ class _RecommendationBoardState extends ConsumerState<RecommendationBoard> {
 
   Future<void> fetchRecommandationBillDataFromServer() async {
     final url = Uri.parse(
-        "http://20.39.187.232:8000/recommendation/bills?bill_id=$_billId");
+        "${MainServer.baseUrl}:${MainServer.port}/recommendation/bills?bill_id=$_billId");
     try {
       final response =
           await http.get(url, headers: {'accept': 'application/json'});

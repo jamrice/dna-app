@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'complex_notice_board.dart';
 import 'package:dna/color.dart';
+import 'package:dna/api_address.dart';
 
 class NoticeBoard extends StatelessWidget {
   const NoticeBoard({super.key});
@@ -39,7 +40,7 @@ class _NoticeBoardPage extends State<NoticeBoardPage> {
 
   Future<void> fetchDataFromServer(int page) async {
     final url = Uri.parse(
-        "http://20.39.187.232:8000/bills/all/?page=${page + 1}&items_per_page=10");
+        "${MainServer.baseUrl}:${MainServer.port}/bills/all/?page=${page + 1}&items_per_page=10");
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -191,7 +192,7 @@ class NoticeBoardItem extends StatelessWidget {
   Future<List<int>?> getViews(String billId) async {
     List<int> likesViewsList = [];
     final url = Uri.parse(
-        "http://20.39.187.232:8000/content/content_id?content_id=$billId");
+        "${MainServer.baseUrl}:${MainServer.port}/content/content_id?content_id=$billId");
     final headers = {'accept': "application/json"};
 
     try {
@@ -227,7 +228,7 @@ class NoticeBoardItem extends StatelessWidget {
                 builder: (context) => ComplexNoticeBoard(data: itemData)));
       },
       child: Padding(
-        padding: EdgeInsets.only(bottom: 5, left: 10, right: 10),
+        padding: EdgeInsets.only(bottom: 5, left: 5, right: 5),
         child: Container(
           height: 70,
           child: Row(

@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:dna/api_address.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -37,7 +37,7 @@ class _SimpleNoticeBoardItemState extends State<SimpleNoticeBoardItem> {
 
   Future<List<dynamic>> fetchSimpleDataFromServer() async {
     final url = Uri.parse(
-        "http://20.39.187.232:8000/bills/all?page=1&items_per_page=10");
+        "${MainServer.baseUrl}:${MainServer.port}/bills/all?page=1&items_per_page=10");
     try {
       final response = await http.get(url).timeout(
         const Duration(seconds: 10),
@@ -61,7 +61,6 @@ class _SimpleNoticeBoardItemState extends State<SimpleNoticeBoardItem> {
 
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder(
       future: _futureData,
       builder: (context, snapshot) {
@@ -75,6 +74,7 @@ class _SimpleNoticeBoardItemState extends State<SimpleNoticeBoardItem> {
 
         List<dynamic> data = snapshot.data!;
         return ListView.builder(
+          shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
           itemCount: 5, // 항상 5개 표시
           itemBuilder: (context, index) {

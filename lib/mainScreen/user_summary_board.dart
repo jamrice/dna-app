@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../secure_storage/secure_storage_notifier.dart';
 import '../boardScreen/complex_notice_board.dart';
 import '../loginScreen/login_screen.dart';
+import 'package:dna/api_address.dart';
 
 class SummaryBoard extends ConsumerStatefulWidget {
   const SummaryBoard({super.key});
@@ -62,7 +63,7 @@ class _SummaryBoardState extends ConsumerState<SummaryBoard> {
 
   Future<int?> getViews(String billId) async {
     final url = Uri.parse(
-        "http://20.39.187.232:8000/content/content_id?content_id=$billId");
+        "${MainServer.baseUrl}:${MainServer.port}/content/content_id?content_id=$billId");
     final headers = {'accept': "application/json"};
 
     try {
@@ -87,7 +88,7 @@ class _SummaryBoardState extends ConsumerState<SummaryBoard> {
   }
 
   Future<void> fetchRecommandationDataFromServer(String token) async {
-    final url = Uri.parse("http://20.39.187.232:8000/recommendation/user_id");
+    final url = Uri.parse("${MainServer.baseUrl}:${MainServer.port}/recommendation/user_id");
 
     try {
       final response = await http.get(url,
@@ -130,6 +131,7 @@ class _SummaryBoardState extends ConsumerState<SummaryBoard> {
 
     return Container(
       color: Colors.transparent,
+      margin: EdgeInsets.symmetric(horizontal: 3),
       child: isLoading
           ? Center(child: CircularProgressIndicator(color: Colors.grey))
           : !hasToken
